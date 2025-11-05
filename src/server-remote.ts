@@ -98,6 +98,30 @@ function verifyToken(token: string): Promise<any> {
   });
 }
 
+async function validateAccessToken(token: string): Promise<{
+  valid: boolean;
+  clientId?: string;
+  scopes?: string[];
+  userId?: string;
+  audience?: string;
+}> {
+  try {
+    // Using JWT tokens, validate locally
+    const result = await verifyToken(token) as any;
+    
+    return {
+      valid: true,
+      clientId: result.client_id,
+      scopes: result.scope?.split(' '),
+      userId: result.sub,
+      audience: result.aud
+    };
+  } catch (error) {
+    console.error('Token validation error:', error);
+    return { valid: false };
+  }
+}
+
 // Middleware to check for valid access token
 const authenticateRequest = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const authHeader = req.headers.authorization;
@@ -151,30 +175,6 @@ const authenticateRequest = async (req: express.Request, res: express.Response, 
     });
   }
 };
-
-async function validateAccessToken(token: string): Promise<{
-  valid: boolean;
-  clientId?: string;
-  scopes?: string[];
-  userId?: string;
-  audience?: string;
-}> {
-  try {
-    // Using JWT tokens, validate locally
-    const result = await verifyToken(token) as any;
-    
-    return {
-      valid: true,
-      clientId: result.client_id,
-      scopes: result.scope?.split(' '),
-      userId: result.sub,
-      audience: result.aud
-    };
-  } catch (error) {
-    console.error('Token validation error:', error);
-    return { valid: false };
-  }
-}
 
 const handleMcpRequest = async (req: express.Request, res: express.Response) => {
   // Check for existing session ID

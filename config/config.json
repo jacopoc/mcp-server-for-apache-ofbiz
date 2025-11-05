@@ -1,11 +1,11 @@
 {
   "BACKEND_API_BASE": "https://demo-stable.ofbiz.apache.org/rest/services",
   "BACKEND_API_AUTH": "https://demo-stable.ofbiz.apache.org/rest/auth/token",
-  "BACKEND_AUTH_TOKEN": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NjE5MDIzMTIsImV4cCI6MTc2MTkwNDExMiwiaXNzIjoiQXBhY2hlT0ZCaXoiLCJ1c2VyTG9naW5JZCI6ImFkbWluIn0.y_0AXv-rL1PVGWdmIp0oBVe7rPhgffd_g4xk9kSAs6Q3Enf3njJzXrGb2_Y1NHkgqBWGp0NiXk3Rm41z22pSag",
+  "BACKEND_AUTH_TOKEN": "",
   "SERVER_PORT": 3000,
   "MCP_SERVER_BASE_URL": "",
   "AUTHZ_SERVER_BASE_URL": "",
   "SCOPES_SUPPORTED": [
-    "mcp:tools"
+    "mcp:call-tools"
   ]
 }
