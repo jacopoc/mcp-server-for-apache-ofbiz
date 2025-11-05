@@ -57,6 +57,7 @@ async function getJwksUri(issuer: string): Promise<string> {
   }
   return jwks;
 }
+
 // Create a JWKS client to retrieve the public key
 const client = !enableAuth ? null : jwksClient({
   jwksUri: await getJwksUri(AUTHZ_SERVER_BASE_URL),
@@ -80,24 +81,6 @@ function getKey(header: JwtHeader, callback: SigningKeyCallback) {
   });
 }
 
-function verifyToken(token: string): Promise<any> {
-  return new Promise((resolve, reject) => {
-    jwt.verify(
-      token,
-      getKey,
-      {
-        algorithms: ["RS256"], // FIXME: adjust based on token's algorithm
-        audience: MCP_SERVER_BASE_URL, 
-        issuer: AUTHZ_SERVER_BASE_URL,
-      },
-      (err, decoded) => {
-        if (err) return reject(err);
-        resolve(decoded);
-      }
-    );
-  });
-}
-
 async function validateAccessToken(token: string): Promise<{
   valid: boolean;
   clientId?: string;
@@ -106,9 +89,23 @@ async function validateAccessToken(token: string): Promise<{
   audience?: string;
 }> {
   try {
-    // Using JWT tokens, validate locally
-    const result = await verifyToken(token) as any;
-    
+    // Using JWT tokens, validate locally    
+    const result = await new Promise<any>((resolve, reject) => {
+      jwt.verify(
+        token,
+        getKey,
+        {
+          algorithms: ["RS256"], // FIXME: adjust based on token's algorithm
+          audience: MCP_SERVER_BASE_URL, 
+          issuer: AUTHZ_SERVER_BASE_URL,
+        },
+        (err, decoded) => {
+          if (err) return reject(err);
+          resolve(decoded);
+        }
+      );
+    });
+
     return {
       valid: true,
       clientId: result.client_id,
