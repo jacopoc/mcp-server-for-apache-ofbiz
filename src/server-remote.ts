@@ -87,7 +87,7 @@ function verifyToken(token: string): Promise<any> {
       getKey,
       {
         algorithms: ["RS256"], // FIXME: adjust based on token's algorithm
-        //audience: "my-client-id", // FIXME
+        audience: MCP_SERVER_BASE_URL, 
         issuer: AUTHZ_SERVER_BASE_URL,
       },
       (err, decoded) => {
@@ -162,12 +162,6 @@ async function validateAccessToken(token: string): Promise<{
   try {
     // Using JWT tokens, validate locally
     const result = await verifyToken(token) as any;
-
-    // Ensure the audience matches the MCP server's canonical URI
-    if (result.aud !== MCP_SERVER_BASE_URL) {
-      // FIXME
-      //return { valid: false };
-    }
     
     return {
       valid: true,
