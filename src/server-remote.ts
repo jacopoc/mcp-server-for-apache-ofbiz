@@ -408,7 +408,7 @@ app.use(express.json());
 // CORS configuration
 app.use(
   cors({
-    origin: configData.MCP_SERVER_CORS_ORIGINS || ['*'],
+    origin: configData.MCP_SERVER_CORS_ORIGINS,
     exposedHeaders: ['Mcp-Session-Id']
   })
 );
