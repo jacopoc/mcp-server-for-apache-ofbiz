@@ -262,7 +262,7 @@ const handleMcpRequest = async (req: express.Request, res: express.Response) => 
 
   if (sessionId && getTransport(sessionId)) {
     // Reuse existing transport
-    transport = getTransport(sessionId);
+    transport = getTransport(sessionId)!;
   } else if (!sessionId && isInitializeRequest(req.body)) {
     // New initialization request
     transport = new StreamableHTTPServerTransport({
@@ -334,7 +334,7 @@ const handleMcpRequest = async (req: express.Request, res: express.Response) => 
   if (sessionId) {
     let downstreamToken = getDownstreamToken(sessionId);
     if (!downstreamToken) {
-      if ((req as any).auth.valid) {
+      if ((req as any).auth.valid && MCP_SERVER_CLIENT_ID && MCP_SERVER_CLIENT_SECRET) {
         downstreamToken = await performTokenExchange((req as any).auth.subjectToken);
       }
       if (downstreamToken) {
@@ -362,36 +362,37 @@ const handleSessionRequest = async (req: express.Request, res: express.Response)
     res.status(400).send('Invalid or missing session ID');
     return;
   }
-
   const transport = getTransport(sessionId);
-  await transport.handleRequest(req, res);
+  await transport?.handleRequest(req, res);
 };
 
 // Map to store transports by session ID
-const sessions: { [sessionId: string]: { transport: StreamableHTTPServerTransport; downstreamToken: string | null } } = {};
+const sessions = new Map<string, {transport: StreamableHTTPServerTransport, downstreamToken: string | null}>();
 
 // Helper functions to access the transports map
-function getTransport(sessionId: string): StreamableHTTPServerTransport {
-  const entry = sessions[sessionId];
+function getTransport(sessionId: string): StreamableHTTPServerTransport | undefined {
+  const entry = sessions.get(sessionId);
   return entry?.transport;
 }
 
 function getDownstreamToken(sessionId: string): string | null {
-  const entry = sessions[sessionId];
-  return entry?.downstreamToken;
+  const entry = sessions.get(sessionId);
+  if (!entry) return null;
+  return entry.downstreamToken;
 }
 
 function addSession(sessionId: string, transport: StreamableHTTPServerTransport): void {
-  sessions[sessionId] = { transport, downstreamToken: null };
+  sessions.set(sessionId, { transport, downstreamToken: null });
 }
 
 function deleteSession(sessionId?: string): void {
   if (!sessionId) return;
-  delete sessions[sessionId];
+  sessions.delete(sessionId);
 }
 
 function setDownstreamToken(sessionId: string, downstreamToken: string): void {
-  const entry = sessions[sessionId];
+  const entry = sessions.get(sessionId);
+  if (!entry) return;
   entry.downstreamToken = downstreamToken;
 }
 
