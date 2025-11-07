@@ -3,6 +3,8 @@
   "BACKEND_API_AUTH": "https://demo-stable.ofbiz.apache.org/rest/auth/token",
   "BACKEND_AUTH_TOKEN": "",
   "SERVER_PORT": 3000,
+  "RATE_LIMIT_WINDOW_MS": 60000,
+  "RATE_LIMIT_MAX_REQUESTS": 100,
   "MCP_SERVER_BASE_URL": "",
   "AUTHZ_SERVER_BASE_URL": "",
   "SCOPES_SUPPORTED": [

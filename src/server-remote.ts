@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import fetch from "node-fetch";
 import express from "express";
+import rateLimit from "express-rate-limit";
 import cors from "cors";
 import { randomUUID } from "node:crypto";
 import jwt, { JwtHeader, SigningKeyCallback } from "jsonwebtoken";
@@ -41,6 +42,8 @@ export const USER_AGENT = "OFBiz-MCP-server";
 
 // Server configuration
 const SERVER_PORT = configData.SERVER_PORT;
+const RATE_LIMIT_WINDOW_MS = configData.RATE_LIMIT_WINDOW_MS || 60000; // default 1 minute
+const RATE_LIMIT_MAX_REQUESTS = configData.RATE_LIMIT_MAX_REQUESTS || 100; // default 100 requests
 /*
 const USE_HTTPS = configData.USE_HTTPS || false;
 const SSL_KEY_PATH = configData.SSL_KEY_PATH;
@@ -412,6 +415,14 @@ app.use(
     exposedHeaders: ['Mcp-Session-Id']
   })
 );
+// Rate limiting to prevent abuse
+const limiter = rateLimit({
+  windowMs: RATE_LIMIT_WINDOW_MS,
+  max: RATE_LIMIT_MAX_REQUESTS,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(limiter);
 
 if (enableAuth) {
   // Handle OAuth Protected Resource Metadata endpoint (RFC9728)
