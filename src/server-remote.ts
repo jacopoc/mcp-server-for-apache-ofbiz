@@ -337,12 +337,11 @@ const handleMcpRequest = async (req: express.Request, res: express.Response) => 
       if ((req as any).auth.valid) {
         downstreamToken = await performTokenExchange((req as any).auth.subjectToken);
       }
-      if (!downstreamToken) {
-        // No downstream token obtained from token exchange, fallback to static token
-        downstreamToken = BACKEND_AUTH_TOKEN();
-      }
       if (downstreamToken) {
         setDownstreamToken(sessionId, downstreamToken);
+      } else {
+        // No downstream token obtained from token exchange, fallback to static token
+        downstreamToken = BACKEND_AUTH_TOKEN();
       }
     }
     if (downstreamToken) {
