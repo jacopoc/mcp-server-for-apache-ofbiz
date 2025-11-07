@@ -8,6 +8,9 @@
   "SCOPES_SUPPORTED": [
     "mcp:call-tools"
   ],
+  "MCP_SERVER_CORS_ORIGINS": [
+    "*"
+  ],
   "MCP_SERVER_CLIENT_ID": "",
   "MCP_SERVER_CLIENT_SECRET": ""
 }

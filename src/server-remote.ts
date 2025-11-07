@@ -405,10 +405,10 @@ const resourceMetadataUrl = (enableAuth ? getOAuthProtectedResourceMetadataUrl(n
 
 const app = express();
 app.use(express.json());
-// Allow CORS all domains, expose the Mcp-Session-Id header
+// CORS configuration
 app.use(
   cors({
-    origin: '*', // Allow all origins
+    origin: configData.MCP_SERVER_CORS_ORIGINS || ['*'],
     exposedHeaders: ['Mcp-Session-Id']
   })
 );
