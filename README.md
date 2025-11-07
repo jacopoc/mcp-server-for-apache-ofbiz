@@ -16,6 +16,10 @@ The project is implemented in **TypeScript**, uses the **Anthropic TypeScript SD
 - Node.js  
 - npm
 
+<a href="https://glama.ai/mcp/servers/@jacopoc/mcp-for-apache-ofbiz">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@jacopoc/mcp-for-apache-ofbiz/badge" alt="mcp-for-apache-ofbiz MCP server" />
+</a>
+
 ---
 
 ## Table of Contents
@@ -144,7 +148,7 @@ Add your local MCP server configuration:
 
 ## Inspect the MCP servers
 
-You can use Anthropic’s **Inspector** to easily test interactions with the local and remote MCP servers. You can do this also when a remote server is executed in your local host or private network, without requiring valid certificates or deploying the server on a publicly accessible host.
+You can use Anthropic's **Inspector** to easily test interactions with the local and remote MCP servers. You can do this also when a remote server is executed in your local host or private network, without requiring valid certificates or deploying the server on a publicly accessible host.
 
 Run (and install) the Inspector with:
 ```sh
