@@ -1,5 +1,5 @@
 {
-  "BACKEND_API_BASE": "https://demo-stable.ofbiz.apache.org/rest/services",
+  "BACKEND_API_BASE": "https://demo-stable.ofbiz.apache.org",
   "BACKEND_API_AUTH": "https://demo-stable.ofbiz.apache.org/rest/auth/token",
   "BACKEND_AUTH_TOKEN": "",
   "SERVER_PORT": 3000,

@@ -16,7 +16,7 @@ export default function(): ToolDefinition {
         handler: async ({ id }: { id: string }, request: express.Request ) => {
             const idParam = { idToFind: id };
             const inParams = encodeURIComponent(JSON.stringify(idParam));
-            const backendUrl = `${BACKEND_API_BASE}/findProductById?inParams=${inParams}`;
+            const backendUrl = `${BACKEND_API_BASE}/rest/services/findProductById?inParams=${inParams}`;
 
             const requestOptions: { method: string; headers: Record<string, string> } = {
                 method: "GET",
