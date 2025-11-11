@@ -31,20 +31,22 @@ function getConfigData() {
   return JSON.parse(fs.readFileSync(configPath, "utf-8"));
 }
 
+
+export const USER_AGENT = "OFBiz-MCP-server";
+export const BACKEND_API_BASE = configData.BACKEND_API_BASE;
+const BACKEND_API_AUDIENCE = configData.BACKEND_API_AUDIENCE;
+const BACKEND_API_RESOURCE = configData.BACKEND_API_RESOURCE;
+const BACKEND_AUTH_TOKEN = () => getConfigData().BACKEND_AUTH_TOKEN;
 const MCP_SERVER_BASE_URL = configData.MCP_SERVER_BASE_URL;
 const AUTHZ_SERVER_BASE_URL = configData.AUTHZ_SERVER_BASE_URL;
 const SCOPES_SUPPORTED = configData.SCOPES_SUPPORTED;
 const MCP_SERVER_CLIENT_ID = configData.MCP_SERVER_CLIENT_ID;
 const MCP_SERVER_CLIENT_SECRET = configData.MCP_SERVER_CLIENT_SECRET;
-export const BACKEND_API_BASE = configData.BACKEND_API_BASE;
-export const BACKEND_AUTH_TOKEN = () => getConfigData().BACKEND_AUTH_TOKEN;
-export const USER_AGENT = "OFBiz-MCP-server";
-
 // Server configuration
 const SERVER_PORT = configData.SERVER_PORT;
 const RATE_LIMIT_WINDOW_MS = configData.RATE_LIMIT_WINDOW_MS || 60000; // default 1 minute
 const RATE_LIMIT_MAX_REQUESTS = configData.RATE_LIMIT_MAX_REQUESTS || 100; // default 100 requests
-/*
+/* TODO: SSL support
 const USE_HTTPS = configData.USE_HTTPS || false;
 const SSL_KEY_PATH = configData.SSL_KEY_PATH;
 const SSL_CERT_PATH = configData.SSL_CERT_PATH;
@@ -228,8 +230,8 @@ async function performTokenExchange(subjectToken: string): Promise<string | null
         subject_token_type: "urn:ietf:params:oauth:token-type:access_token",
         requested_token_type: "urn:ietf:params:oauth:token-type:access_token",
         scope: "ofbiz:use-api",
-        resource: BACKEND_API_BASE,
-        audience: BACKEND_API_BASE
+        resource: BACKEND_API_RESOURCE,
+        audience: BACKEND_API_AUDIENCE
       });
 
     // Verify the response contains the expected access token
