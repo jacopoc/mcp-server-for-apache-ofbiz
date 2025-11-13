@@ -1,20 +1,23 @@
-# MCP Server for REST APIs
+# MCP Server for Apache OFBiz®
 
-This project provides a prototype implementation of an MCP server that:  
+This project provides a prototype implementation of a Model Context Protocol (MCP) server for Apache OFBiz® that:  
+ 
+- receives requests from an MCP client (usually hosted in a generative AI application such as Claude Desktop) and forwards those requests to a remote backend via RESTful API endpoints,
+- exposes a tamplate tool that invokes the findProductById OFBiz endpoint.
 
-- exposes specific tools,  
-- receives requests from an MCP client (usually hosted in a generative AI application such as Claude Desktop),  
-- forwards those requests to a remote backend via RESTful API endpoints,
-- implements authorization according to the MCP specifications (OAuth Authorization Code Flow with support for Metadata discovery, Dynamic Client Registration etc...).
-
-The server enables generative AI applications to interact with backend systems that expose REST API endpoints, such as **Apache OFBiz** and **Moqui**.  
+The server can enable generative AI applications to interact with any backend system that exposes REST API endpoints, such as [**Apache OFBiz**](https://ofbiz.apache.org) or [**Moqui**](https://www.moqui.org).  
 
 The server is implemented in two versions, one that runs as a local MCP server (stdio transport) and one that runs as a remote MCP server (Streamable HTTP transport).
 
-The project is implemented in **TypeScript**, uses the **Anthropic TypeScript SDK**, and requires:  
+The project leverages the **Anthropic TypeScript SDK**, and requires:  
 
 - Node.js  
 - npm
+
+This software is licensed under the Apache License, Version 2.0.
+
+Apache OFBiz® is a trademark of the [Apache Software Foundation](https://www.apache.org) 
+
 
 ---
 
@@ -36,9 +39,19 @@ The project includes two alternative MCP servers:
 - **Local MCP server** (`src/server-local.ts`) — communicates with the MCP client via stdio transport.  
 - **Remote MCP server** (`src/server-remote.ts`) — communicates with the MCP client via MCP Streamable HTTP transport.  
 
-The servers are modular and dynamically discover MCP tools contained in the `tools` directory.  
+The servers dynamically discover MCP tools contained in the `tools` directory.  
 
-Each tool is defined and implemented in its own file. For example, the sample tool `tools/findProductById.ts` invokes an endpoint in Apache OFBiz to retrieve product information for a given ID. This works with an out-of-the-box (OOTB) OFBiz instance with the `rest-api` plugin installed.  
+Each tool is defined and implemented in its own file. For example, the sample tool `tools/findProductById.ts` invokes an endpoint in Apache OFBiz to retrieve product information for a given product ID. This works with an out-of-the-box (OOTB) OFBiz instance with the `rest-api` plugin installed. 
+
+New tools can be published by simply including their definition files in the `tools` folder.
+
+The remote server:
+- is compliant with the latest MCP specifications
+- supports authorization according to the MCP recommendations (OAuth Authorization Code Flow with support for Metadata discovery, Dynamic Client Registration, etc...)
+- supports the token exchange OAuth flow in order to obtain a valid token for the backend system 
+- performs token validation with configurable scopes and audience verification
+- provides rate limiting features to protect the MCP server and the backend server from denial of service attacks
+- allows CORS restrictions
 
 ---
 
@@ -47,30 +60,41 @@ Each tool is defined and implemented in its own file. For example, the sample to
 Server configuration is managed via `config/config.json`, which defines:  
 
 - **`MCP_SERVER_BASE_URL`** — the base URL of the MCP server (Protected Resource Server in OAuth)
-- **`AUTHZ_SERVER_BASE_URL`** — the base URL of the Authorization server (OAuth)
-- **`BACKEND_API_BASE`** — the base URL for backend REST API calls  
-- **`BACKEND_API_AUTH`** - the URL to get the OFBiz APIs access token
-- **`BACKEND_AUTH_TOKEN`** — the token used to authorize backend API calls  
 - **`SERVER_PORT`** — the port on which the MCP server listens for client connections (required only for the remote server)  
+- **`MCP_SERVER_CORS_ORIGINS`** — CORS origin allowed 
+- **`AUTHZ_SERVER_BASE_URL`** — the base URL of the Authorization (Authz) server (OAuth)
+- **`BACKEND_API_BASE`** — the base URL for backend REST API calls  
+- **`MCP_SERVER_CLIENT_ID`** — Client ID required for token exchange, as registered in Authz server  
+- **`MCP_SERVER_CLIENT_SECRET`** — the secret associated with **`MCP_SERVER_CLIENT_ID`** 
+- **`SCOPES_SUPPORTED`** — the scopes that the MCP client can request  
+- **`BACKEND_API_AUDIENCE`** — the OAuth audience paramenter for the backend system 
+- **`BACKEND_API_RESOURCE`** — the OAuth resource parameter for the backend system    
+- **`BACKEND_API_AUTH`** - the URL to get the OFBiz APIs access token used if token exchange is not enabled
+- **`BACKEND_AUTH_TOKEN`** — the token to authorize backend API calls used if token exchange is not enabled  
+- **`RATE_LIMIT_WINDOW_MS`** — time window in ms for the requests rate limiting feature
+- **`RATE_LIMIT_MAX_REQUESTS`** — max number of requests allowed in the time window 
+
 
 If either **`MCP_SERVER_BASE_URL`** or **`AUTHZ_SERVER_BASE_URL`** are not set, authorization is disabled and the MCP server is publicly accessible.
 
-The authorization token for the OFBiz API can be easily generated and set up by running the script: 
+If authorization is enabled, but either **`MCP_SERVER_CLIENT_ID`** or **`MCP_SERVER_CLIENT_SECRET`** are not set, token exchange is disabled.
+
+If token exchange is not enabled, the access token for the OFBiz API can be easily generated and set up by running the script: 
 
 `update_token.sh <user> <password>` 
 
-This script retrieves a JWT for an OOTB OFBiz instance (e.g., `https://demo-stable.ofbiz.apache.org/rest/auth/token`).  
+This script retrieves a JWT for an OOTB OFBiz instance, as specified by **`BACKEND_API_AUTH`** (e.g., `https://demo-stable.ofbiz.apache.org/rest/auth/token`).  
 
 ---
 
 ## Project Structure
 
 ```text
-mcp-prototypes/
+mcp-server-for-apache-ofbiz/
 ├── config/
 │   └── config.json               # Server configuration (backend API base, auth token, etc.)
 ├── src/
-│   ├── server-local.ts                 # Local MCP server (stdio transport)
+│   ├── server-local.ts           # Local MCP server (stdio transport)
 │   ├── server-remote.ts          # Remote MCP server (Streamable HTTP transport)
 │   ├── toolLoader.ts             # Loader of tool definitions from "tools/"
 │   └── tools/               
@@ -78,7 +102,8 @@ mcp-prototypes/
 ├── update_token.sh               # Script to refresh backend auth token
 ├── package.json
 ├── tsconfig.json
-└── README.md
+└── README.md                     # This readme file
+└── LICENSE                       # Apache License, Version 2.0 
 ```
 
 ## Build the Project
@@ -90,7 +115,7 @@ npm run build
 
 ## Test the Local MCP Server
 
-You can test the local MCP server with **Claude Desktop**.  
+You can test the local MCP server with the free version of **Claude Desktop**.  
 
 Edit or create the Claude Desktop configuration file:
 
@@ -103,7 +128,7 @@ Add your local MCP server configuration:
   "mcpServers": {
     "Apache OFBiz": {
       "command": "node",
-      "args": ["PATH_TO/mcp-prototypes/build/server-local.js"]
+      "args": ["PATH_TO/mcp-server-for-apache-ofbiz/build/server-local.js"]
     }
   }
 }
@@ -123,7 +148,7 @@ Start the server:
 node build/server-remote.js
 ```
 
-You can test the local MCP server with **Claude Desktop**.  
+You can test the local MCP server with the free version of **Claude Desktop**.  
 
 Edit or create the Claude Desktop configuration file:
 
