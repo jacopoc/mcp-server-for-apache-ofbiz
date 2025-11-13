@@ -1,11 +1,11 @@
 {
-  "name": "mcp_sdk_stdio",
+  "name": "mcp_server_for_apache_ofbiz",
   "version": "1.0.0",
   "type": "module",
-  "main": "server.js",
+  "main": "server-local.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc && chmod 755 build/server.js"
+    "build": "tsc && chmod 755 build/server-local.js"
   },
   "keywords": [],
   "author": "",
@@ -29,7 +29,7 @@
     "typescript": "^5.9.2"
   },
   "bin": {
-    "mcp_sdk_stdio": "./build/server.js"
+    "mcp_server_for_apache_ofbiz": "./build/server-local.js"
   },
   "files": [
     "build"

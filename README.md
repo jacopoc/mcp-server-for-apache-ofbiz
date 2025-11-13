@@ -33,7 +33,7 @@ The project is implemented in **TypeScript**, uses the **Anthropic TypeScript SD
 
 The project includes two alternative MCP servers:  
 
-- **Local MCP server** (`src/server.ts`) — communicates with the MCP client via stdio transport.  
+- **Local MCP server** (`src/server-local.ts`) — communicates with the MCP client via stdio transport.  
 - **Remote MCP server** (`src/server-remote.ts`) — communicates with the MCP client via MCP Streamable HTTP transport.  
 
 The servers are modular and dynamically discover MCP tools contained in the `tools` directory.  
@@ -70,7 +70,7 @@ mcp-prototypes/
 ├── config/
 │   └── config.json               # Server configuration (backend API base, auth token, etc.)
 ├── src/
-│   ├── server.ts                 # Local MCP server (stdio transport)
+│   ├── server-local.ts                 # Local MCP server (stdio transport)
 │   ├── server-remote.ts          # Remote MCP server (Streamable HTTP transport)
 │   ├── toolLoader.ts             # Loader of tool definitions from "tools/"
 │   └── tools/               
@@ -103,7 +103,7 @@ Add your local MCP server configuration:
   "mcpServers": {
     "Apache OFBiz": {
       "command": "node",
-      "args": ["PATH_TO/mcp-prototypes/build/server.js"]
+      "args": ["PATH_TO/mcp-prototypes/build/server-local.js"]
     }
   }
 }
