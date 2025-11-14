@@ -11,6 +11,13 @@ export default function(): ToolDefinition {
             description: "Find a product by using its ID. If the ID is not provided, ask for it.",
             inputSchema: {
                 id: z.string().min(2).max(20).describe("ID of the product to find; must be between 2 and 20 characters long."),
+            },
+            outputSchema: {
+                productId: z.string().optional().describe("The unique identifier of the product."),
+                productName: z.string().optional().describe("The name of the product."),
+                internalName: z.string().optional().describe("The technical name of the product."),
+                description: z.string().optional().describe("A brief description of the product."),
+                productTypeId: z.string().optional().describe("The type identifier of the product.")
             }
         },
         handler: async ({ id }: { id: string }, request: express.Request ) => {
@@ -37,22 +44,21 @@ export default function(): ToolDefinition {
                 }
                 
                 const responseData = await response.json();
-                const resultString = [
-                    `Product ID: ${responseData.data.product.productId || ""}`,
-                    `Name: ${responseData.data.product.productName || ""}`,
-                    `Internal Name: ${responseData.data.product.productName || ""}`,
-                    `Description: ${responseData.data.product.description || ""}`,
-                    `Product Type ID: ${responseData.data.product.productTypeId || ""}`,
-                    "---",
-                ].join("\n");
-                
+                const structuredContent = {
+                    productId: responseData.data.product.productId || "",
+                    productName: responseData.data.product.productName || "",
+                    internalName: responseData.data.product.internalName || "",
+                    description: responseData.data.product.description || "",
+                    productTypeId: responseData.data.product.productTypeId || ""
+                };
                 return {
                     content: [
                         {
                             type: "text",
-                            text: resultString,
+                            text: JSON.stringify(structuredContent),
                         },
                     ],
+                    structuredContent: structuredContent
                 };
             } catch (error) {
                 console.error("Error making backend request:", error);
@@ -63,6 +69,7 @@ export default function(): ToolDefinition {
                             text: `Error finding product: ${error instanceof Error ? error.message : 'Unknown error'}`,
                         },
                     ],
+                    structuredContent: {}
                 };
             }
         }

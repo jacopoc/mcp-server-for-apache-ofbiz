@@ -6,7 +6,8 @@ export interface ToolDefinition {
     metadata: {
         title: string,
         description: string,
-        inputSchema: Record<string, any>
+        inputSchema: Record<string, any>,
+        outputSchema: Record<string, any>
     };
     handler: (params: any, request: any) => Promise<any>;
 }
