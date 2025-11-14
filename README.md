@@ -5,7 +5,7 @@ This project provides a prototype implementation of a Model Context Protocol (MC
 - receives requests from an MCP client (usually hosted in a generative AI application such as Claude Desktop) and forwards those requests to a remote backend via RESTful API endpoints,
 - exposes a tamplate tool that invokes the findProductById OFBiz endpoint.
 
-The server can enable generative AI applications to interact with any backend system that exposes REST API endpoints, such as [**Apache OFBiz**](https://ofbiz.apache.org) or [**Moqui**](https://www.moqui.org).  
+This project can be used as a platform to implement your own tools and enable generative AI applications to interact with any backend system that exposes REST API endpoints, such as [**Apache OFBiz**](https://ofbiz.apache.org) or [**Moqui**](https://www.moqui.org).  
 
 The server is implemented in two versions, one that runs as a local MCP server (stdio transport) and one that runs as a remote MCP server (Streamable HTTP transport).
 
