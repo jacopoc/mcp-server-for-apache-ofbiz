@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import * as https from "https";
 import fetch from "node-fetch";
 import express from "express";
 import rateLimit from "express-rate-limit";
@@ -31,7 +32,6 @@ function getConfigData() {
   return JSON.parse(fs.readFileSync(configPath, "utf-8"));
 }
 
-
 export const USER_AGENT = "OFBiz-MCP-server";
 export const BACKEND_API_BASE = configData.BACKEND_API_BASE;
 const BACKEND_API_AUDIENCE = configData.BACKEND_API_AUDIENCE;
@@ -46,13 +46,13 @@ const MCP_SERVER_CLIENT_SECRET = configData.MCP_SERVER_CLIENT_SECRET;
 const SERVER_PORT = configData.SERVER_PORT;
 const RATE_LIMIT_WINDOW_MS = configData.RATE_LIMIT_WINDOW_MS || 60000; // default 1 minute
 const RATE_LIMIT_MAX_REQUESTS = configData.RATE_LIMIT_MAX_REQUESTS || 100; // default 100 requests
-/* TODO: SSL support
-const USE_HTTPS = configData.USE_HTTPS || false;
-const SSL_KEY_PATH = configData.SSL_KEY_PATH;
-const SSL_CERT_PATH = configData.SSL_CERT_PATH;
-*/
+// TLS support configuration (optional)
+const TLS_KEY_PATH = configData.TLS_KEY_PATH || "";
+const TLS_CERT_PATH = configData.TLS_CERT_PATH || "";
+const TLS_KEY_PASSPHRASE = configData.TLS_KEY_PASSPHRASE;
 
 const enableAuth = (MCP_SERVER_BASE_URL && AUTHZ_SERVER_BASE_URL);
+const enableHttps = (TLS_KEY_PATH && TLS_CERT_PATH);
 
 // Function to fetch JWKS URI from OpenID Connect metadata
 async function getJwksUri(issuer: string): Promise<string> {
@@ -455,6 +455,32 @@ app.get('/mcp', handleSessionRequest);
 // Handle DELETE requests for session termination
 app.delete('/mcp', handleSessionRequest);
 
-app.listen(SERVER_PORT, () => {
-  console.log(`MCP stateful Streamable HTTP Server listening on port ${SERVER_PORT} with ${enableAuth ? 'authentication' : 'no authentication'}.`);
-});
+if (enableHttps) {
+  try {
+    // Resolve key/cert relative to the project if paths provided in config are relative
+    const base = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+    const keyPath = path.isAbsolute(TLS_KEY_PATH) ? TLS_KEY_PATH : path.join(base, TLS_KEY_PATH);
+    const certPath = path.isAbsolute(TLS_CERT_PATH) ? TLS_CERT_PATH : path.join(base, TLS_CERT_PATH);
+
+    const key = fs.readFileSync(keyPath);
+    const cert = fs.readFileSync(certPath);
+
+    const serverOptions: https.ServerOptions = {
+      key,
+      cert,
+      passphrase: TLS_KEY_PASSPHRASE,
+    };
+
+    const httpsServer = https.createServer(serverOptions, app);
+    httpsServer.listen(SERVER_PORT, () => {
+      console.log(`MCP stateful Streamable HTTPS Server listening on port ${SERVER_PORT} with ${enableAuth ? 'authentication' : 'no authentication'}.`);
+    });
+  } catch (err) {
+    console.error("Failed to start HTTPS server:", err);
+    process.exit(1);
+  }
+} else {
+  app.listen(SERVER_PORT, () => {
+    console.log(`MCP stateful Streamable HTTP Server listening on port ${SERVER_PORT} with ${enableAuth ? 'authentication' : 'no authentication'}.`);
+  });
+}
