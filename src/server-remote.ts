@@ -106,7 +106,7 @@ async function validateAccessToken(token: string): Promise<{
         getKey,
         {
           algorithms: ["RS256"], // FIXME: adjust based on token's algorithm
-          audience: MCP_SERVER_BASE_URL,
+          audience: MCP_SERVER_CLIENT_ID,
           issuer: AUTHZ_SERVER_BASE_URL,
         },
         (err, decoded) => {
