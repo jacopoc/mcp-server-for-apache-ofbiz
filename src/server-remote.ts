@@ -42,6 +42,7 @@ const AUTHZ_SERVER_BASE_URL = configData.AUTHZ_SERVER_BASE_URL;
 const SCOPES_SUPPORTED = configData.SCOPES_SUPPORTED;
 const MCP_SERVER_CLIENT_ID = configData.MCP_SERVER_CLIENT_ID;
 const MCP_SERVER_CLIENT_SECRET = configData.MCP_SERVER_CLIENT_SECRET;
+const TOKEN_EXCHANGE_SCOPE = configData.TOKEN_EXCHANGE_SCOPE || [];
 // Server configuration
 const SERVER_PORT = configData.SERVER_PORT;
 const RATE_LIMIT_WINDOW_MS = configData.RATE_LIMIT_WINDOW_MS || 60000; // default 1 minute
@@ -229,7 +230,7 @@ async function performTokenExchange(subjectToken: string): Promise<string | null
         subject_token: subjectToken,
         subject_token_type: "urn:ietf:params:oauth:token-type:access_token",
         requested_token_type: "urn:ietf:params:oauth:token-type:access_token",
-        scope: "ofbiz:use-api",
+        scope: TOKEN_EXCHANGE_SCOPE.join(' '),
         resource: BACKEND_API_RESOURCE,
         audience: BACKEND_API_AUDIENCE
       });

@@ -19,5 +19,8 @@
     "mcp:call-tools"
   ],
   "MCP_SERVER_CLIENT_ID": "",
-  "MCP_SERVER_CLIENT_SECRET": ""
+  "MCP_SERVER_CLIENT_SECRET": "",
+  "TOKEN_EXCHANGE_SCOPE": [
+    "ofbiz:use-api"
+  ]
 }
