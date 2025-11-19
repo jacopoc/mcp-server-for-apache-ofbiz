@@ -102,11 +102,16 @@ async function validateAccessToken(token: string): Promise<{
   try {
     // Using JWT tokens, validate locally    
     const result = await new Promise<any>((resolve, reject) => {
+      // Decode the token header to obtain the algorithm
+      const decodedToken = jwt.decode(token, { complete: true }) as { header?: JwtHeader } | null;
+      const alg = decodedToken?.header?.alg;
+      if (!alg) return reject(new Error("Missing 'alg' in token header"));
+
       jwt.verify(
         token,
         getKey,
         {
-          algorithms: ["RS256"], // FIXME: adjust based on token's algorithm
+          algorithms: [alg as jwt.Algorithm],
           audience: MCP_SERVER_CLIENT_ID,
           issuer: AUTHZ_SERVER_BASE_URL,
         },
