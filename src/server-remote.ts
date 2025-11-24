@@ -287,6 +287,7 @@ const handleMcpRequest = async (req: express.Request, res: express.Response) => 
       // locally, make sure to set:
       // enableDnsRebindingProtection: true,
       // allowedHosts: ['127.0.0.1'],
+      // allowedOrigins: []
     });
 
     // Clean up transport when closed
@@ -340,9 +341,9 @@ const handleMcpRequest = async (req: express.Request, res: express.Response) => 
   // Prepare downstream token
   // Get or perform token exchange if authentication is enabled
   if (!(req as any).auth) {
-    (req as any).auth = { valid: false, downstreamToken: null };
+    (req as any).auth = { valid: !enableAuth, downstreamToken: null };
   }
-  if (sessionId) {
+  if (sessionId && (req as any).auth.valid) {
     let downstreamToken = getDownstreamToken(sessionId);
     if (!downstreamToken) {
       if ((req as any).auth.valid && MCP_SERVER_CLIENT_ID && MCP_SERVER_CLIENT_SECRET) {
@@ -449,17 +450,16 @@ if (enableAuth) {
       resourceName: "Apache OFBiz MCP Server", // optional
     }),
   );
-  // Handle POST requests for authenticated client-to-server communication
+  // Handle POST, GET and DELETE requests for authenticated client-to-server communication
   app.post('/mcp', authenticateRequest, handleMcpRequest);
+  app.get('/mcp', authenticateRequest, handleSessionRequest);
+  app.delete('/mcp', authenticateRequest, handleSessionRequest);
 } else {
-  // Handle POST requests for unauthenticated client-to-server communication
+  // Handle POST, GET and DELETE requests for unauthenticated client-to-server communication
   app.post('/mcp', handleMcpRequest);
+  app.get('/mcp', handleSessionRequest);
+  app.delete('/mcp', handleSessionRequest);
 }
-// Handle GET requests for server-to-client notifications via SSE
-app.get('/mcp', handleSessionRequest);
-
-// Handle DELETE requests for session termination
-app.delete('/mcp', handleSessionRequest);
 
 if (enableHttps) {
   try {
