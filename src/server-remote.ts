@@ -1,11 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as https from 'https';
+import { randomUUID } from 'node:crypto';
+
 import fetch from 'node-fetch';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import cors from 'cors';
-import { randomUUID } from 'node:crypto';
 import jwt, { JwtHeader, SigningKeyCallback } from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 import * as oidc_client from 'openid-client';
@@ -17,6 +18,7 @@ import { OAuthMetadata } from '@modelcontextprotocol/sdk/shared/auth.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
+
 import { loadTools } from './toolLoader.js';
 
 // Load configuration
