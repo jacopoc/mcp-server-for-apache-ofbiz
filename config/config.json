@@ -1,7 +1,7 @@
 {
   "BACKEND_API_BASE": "https://demo-stable.ofbiz.apache.org",
   "BACKEND_API_AUDIENCE": "https://demo-stable.ofbiz.apache.org",
-  "BACKEND_API_RESOURCE":"https://demo-stable.ofbiz.apache.org",
+  "BACKEND_API_RESOURCE": "https://demo-stable.ofbiz.apache.org",
   "BACKEND_API_AUTH": "https://demo-stable.ofbiz.apache.org/rest/auth/token",
   "BACKEND_AUTH_TOKEN": "",
   "AUTHZ_SERVER_BASE_URL": "",
@@ -12,15 +12,9 @@
   "TLS_KEY_PATH": "",
   "TLS_CERT_PATH": "",
   "TLS_KEY_PASSPHRASE": "",
-  "MCP_SERVER_CORS_ORIGINS": [
-    "*"
-  ],
-  "SCOPES_SUPPORTED": [
-    "mcp:call-tools"
-  ],
+  "MCP_SERVER_CORS_ORIGINS": ["*"],
+  "SCOPES_SUPPORTED": ["mcp:call-tools"],
   "MCP_SERVER_CLIENT_ID": "",
   "MCP_SERVER_CLIENT_SECRET": "",
-  "TOKEN_EXCHANGE_SCOPE": [
-    "ofbiz:use-api"
-  ]
+  "TOKEN_EXCHANGE_SCOPE": ["ofbiz:use-api"]
 }

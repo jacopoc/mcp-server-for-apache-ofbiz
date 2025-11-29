@@ -1,38 +1,38 @@
-import * as fs from "fs";
-import * as path from "path";
-import * as https from "https";
-import fetch from "node-fetch";
-import express from "express";
-import rateLimit from "express-rate-limit";
-import cors from "cors";
-import { randomUUID } from "node:crypto";
-import jwt, { JwtHeader, SigningKeyCallback } from "jsonwebtoken";
-import jwksClient from "jwks-rsa";
-import * as oidc_client from "openid-client";
+import * as fs from 'fs';
+import * as path from 'path';
+import * as https from 'https';
+import fetch from 'node-fetch';
+import express from 'express';
+import rateLimit from 'express-rate-limit';
+import cors from 'cors';
+import { randomUUID } from 'node:crypto';
+import jwt, { JwtHeader, SigningKeyCallback } from 'jsonwebtoken';
+import jwksClient from 'jwks-rsa';
+import * as oidc_client from 'openid-client';
 import {
   mcpAuthMetadataRouter,
   getOAuthProtectedResourceMetadataUrl,
-} from "@modelcontextprotocol/sdk/server/auth/router.js";
-import { OAuthMetadata } from "@modelcontextprotocol/sdk/shared/auth.js";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js"
-import { loadTools } from "./toolLoader.js";
+} from '@modelcontextprotocol/sdk/server/auth/router.js';
+import { OAuthMetadata } from '@modelcontextprotocol/sdk/shared/auth.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
+import { loadTools } from './toolLoader.js';
 
 // Load configuration
 const configPath = path.resolve(
   path.dirname(new URL(import.meta.url).pathname),
-  "../config/config.json"
+  '../config/config.json',
 );
 
-const configData = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+const configData = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 
 // Always read the latest config from the file system
 function getConfigData() {
-  return JSON.parse(fs.readFileSync(configPath, "utf-8"));
+  return JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 }
 
-export const USER_AGENT = "OFBiz-MCP-server";
+export const USER_AGENT = 'OFBiz-MCP-server';
 export const BACKEND_API_BASE = configData.BACKEND_API_BASE;
 const BACKEND_API_AUDIENCE = configData.BACKEND_API_AUDIENCE;
 const BACKEND_API_RESOURCE = configData.BACKEND_API_RESOURCE;
@@ -48,37 +48,39 @@ const SERVER_PORT = configData.SERVER_PORT;
 const RATE_LIMIT_WINDOW_MS = configData.RATE_LIMIT_WINDOW_MS || 60000; // default 1 minute
 const RATE_LIMIT_MAX_REQUESTS = configData.RATE_LIMIT_MAX_REQUESTS || 100; // default 100 requests
 // TLS support configuration (optional)
-const TLS_KEY_PATH = configData.TLS_KEY_PATH || "";
-const TLS_CERT_PATH = configData.TLS_CERT_PATH || "";
+const TLS_KEY_PATH = configData.TLS_KEY_PATH || '';
+const TLS_CERT_PATH = configData.TLS_CERT_PATH || '';
 const TLS_KEY_PASSPHRASE = configData.TLS_KEY_PASSPHRASE;
 
-const enableAuth = (MCP_SERVER_BASE_URL && AUTHZ_SERVER_BASE_URL);
-const enableHttps = (TLS_KEY_PATH && TLS_CERT_PATH);
+const enableAuth = MCP_SERVER_BASE_URL && AUTHZ_SERVER_BASE_URL;
+const enableHttps = TLS_KEY_PATH && TLS_CERT_PATH;
 
 // Function to fetch JWKS URI from OpenID Connect metadata
 async function getJwksUri(issuer: string): Promise<string> {
   const res = await fetch(`${issuer}/.well-known/openid-configuration`);
   if (!res.ok) throw new Error(`Failed to fetch metadata: ${res.statusText}`);
-  const metadata = await res.json() as Record<string, unknown>;
-  const jwks = metadata["jwks_uri"];
-  if (typeof jwks !== "string") {
+  const metadata = (await res.json()) as Record<string, unknown>;
+  const jwks = metadata['jwks_uri'];
+  if (typeof jwks !== 'string') {
     throw new Error("Invalid OpenID metadata: 'jwks_uri' missing or not a string");
   }
   return jwks;
 }
 
 // Create a JWKS client to retrieve the public key
-const client = !enableAuth ? null : jwksClient({
-  jwksUri: await getJwksUri(AUTHZ_SERVER_BASE_URL),
-  cache: true,                 // enable local caching
-  cacheMaxEntries: 5,          // maximum number of keys stored
-  cacheMaxAge: 10 * 60 * 1000, // 10 minutes
-});
+const client = !enableAuth
+  ? null
+  : jwksClient({
+      jwksUri: await getJwksUri(AUTHZ_SERVER_BASE_URL),
+      cache: true, // enable local caching
+      cacheMaxEntries: 5, // maximum number of keys stored
+      cacheMaxAge: 10 * 60 * 1000, // 10 minutes
+    });
 
 // Function to get the public key from the JWT's kid
 function getKey(header: JwtHeader, callback: SigningKeyCallback) {
   if (!client) {
-    return callback(new Error("JWKS client not initialized"));
+    return callback(new Error('JWKS client not initialized'));
   }
   if (!header.kid) {
     return callback(new Error("Missing 'kid' in token header"));
@@ -100,7 +102,7 @@ async function validateAccessToken(token: string): Promise<{
   downstreamToken?: string | null;
 }> {
   try {
-    // Using JWT tokens, validate locally    
+    // Using JWT tokens, validate locally
     const result = await new Promise<any>((resolve, reject) => {
       // Decode the token header to obtain the algorithm
       const decodedToken = jwt.decode(token, { complete: true }) as { header?: JwtHeader } | null;
@@ -118,7 +120,7 @@ async function validateAccessToken(token: string): Promise<{
         (err, decoded) => {
           if (err) return reject(err);
           resolve(decoded);
-        }
+        },
       );
     });
 
@@ -129,7 +131,7 @@ async function validateAccessToken(token: string): Promise<{
       userId: result.sub,
       audience: result.aud,
       subjectToken: token,
-      downstreamToken: null
+      downstreamToken: null,
     };
   } catch (error) {
     console.error('Token validation error:', error);
@@ -138,20 +140,25 @@ async function validateAccessToken(token: string): Promise<{
 }
 
 // Middleware to check for valid access token
-const authenticateRequest = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+const authenticateRequest = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction,
+) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     // Return 401 with WWW-Authenticate header pointing to metadata
-    res.status(401)
+    res
+      .status(401)
       .set('WWW-Authenticate', `Bearer realm="mcp", as_uri="${resourceMetadataUrl}"`)
       .json({
         jsonrpc: '2.0',
         error: {
           code: -32001,
-          message: 'Authorization required'
+          message: 'Authorization required',
         },
-        id: null
+        id: null,
       });
     return;
   }
@@ -163,15 +170,19 @@ const authenticateRequest = async (req: express.Request, res: express.Response, 
     const validationResult = await validateAccessToken(token);
 
     if (!validationResult.valid) {
-      res.status(401)
-        .set('WWW-Authenticate', `Bearer realm="mcp", error="invalid_token", as_uri="${resourceMetadataUrl}"`)
+      res
+        .status(401)
+        .set(
+          'WWW-Authenticate',
+          `Bearer realm="mcp", error="invalid_token", as_uri="${resourceMetadataUrl}"`,
+        )
         .json({
           jsonrpc: '2.0',
           error: {
             code: -32001,
-            message: 'Invalid or expired token'
+            message: 'Invalid or expired token',
           },
-          id: null
+          id: null,
         });
       return;
     }
@@ -184,9 +195,9 @@ const authenticateRequest = async (req: express.Request, res: express.Response, 
       jsonrpc: '2.0',
       error: {
         code: -32603,
-        message: 'Internal server error during authentication'
+        message: 'Internal server error during authentication',
       },
-      id: null
+      id: null,
     });
   }
 };
@@ -208,12 +219,12 @@ async function getOAuthServerConfiguration(): Promise<oidc_client.Configuration>
       MCP_SERVER_CLIENT_ID,
       MCP_SERVER_CLIENT_SECRET,
       undefined,
-      { execute: [oidc_client.allowInsecureRequests] }
+      { execute: [oidc_client.allowInsecureRequests] },
     );
     return cachedAuthServerConfig;
   } catch (err: any) {
-    console.error("Failed to initialize OpenID client:", err.message || err);
-    throw new Error("Failed to initialize OAuth client for token exchange");
+    console.error('Failed to initialize OpenID client:', err.message || err);
+    throw new Error('Failed to initialize OAuth client for token exchange');
   }
 }
 /**
@@ -230,23 +241,23 @@ async function performTokenExchange(subjectToken: string): Promise<string | null
     // Execute the token exchange request
     const response = await oidc_client.genericGrantRequest(
       authServerConfig,
-      "urn:ietf:params:oauth:grant-type:token-exchange",
+      'urn:ietf:params:oauth:grant-type:token-exchange',
       {
         subject_token: subjectToken,
-        subject_token_type: "urn:ietf:params:oauth:token-type:access_token",
-        requested_token_type: "urn:ietf:params:oauth:token-type:access_token",
+        subject_token_type: 'urn:ietf:params:oauth:token-type:access_token',
+        requested_token_type: 'urn:ietf:params:oauth:token-type:access_token',
         scope: TOKEN_EXCHANGE_SCOPE.join(' '),
         resource: BACKEND_API_RESOURCE,
-        audience: BACKEND_API_AUDIENCE
-      });
+        audience: BACKEND_API_AUDIENCE,
+      },
+    );
 
     // Verify the response contains the expected access token
     if (!response?.access_token) {
-      console.error("Token exchange succeeded but no access_token was returned:", response);
+      console.error('Token exchange succeeded but no access_token was returned:', response);
       return null;
     }
     return response.access_token;
-
   } catch (err: unknown) {
     // Handle specific openid-client errors
     /*
@@ -261,7 +272,7 @@ async function performTokenExchange(subjectToken: string): Promise<string | null
       console.error("Unexpected error:", err);
     }
     */
-    console.error("Error during token exchange:", err);
+    console.error('Error during token exchange:', err);
     return null;
   }
 }
@@ -297,8 +308,8 @@ const handleMcpRequest = async (req: express.Request, res: express.Response) => 
       }
     };
     const server = new McpServer({
-      name: "Apache OFBiz MCP Server (Streamable HTTP)",
-      version: "0.1.0"
+      name: 'Apache OFBiz MCP Server (Streamable HTTP)',
+      version: '0.1.0',
     });
 
     // Load and register tools from external files
@@ -307,15 +318,11 @@ const handleMcpRequest = async (req: express.Request, res: express.Response) => 
         const tools = await loadTools();
 
         for (const tool of tools) {
-          server.registerTool(
-            tool.name,
-            tool.metadata,
-            tool.handler
-          );
+          server.registerTool(tool.name, tool.metadata, tool.handler);
           console.error(`Registered tool: ${tool.name}`);
         }
       } catch (error) {
-        console.error("Error loading tools:", error);
+        console.error('Error loading tools:', error);
         throw error;
       }
     }
@@ -379,7 +386,10 @@ const handleSessionRequest = async (req: express.Request, res: express.Response)
 };
 
 // Map to store transports by session ID
-const sessions = new Map<string, {transport: StreamableHTTPServerTransport, downstreamToken: string | null}>();
+const sessions = new Map<
+  string,
+  { transport: StreamableHTTPServerTransport; downstreamToken: string | null }
+>();
 
 // Helper functions to access the transports map
 function getTransport(sessionId: string): StreamableHTTPServerTransport | undefined {
@@ -409,7 +419,9 @@ function setDownstreamToken(sessionId: string, downstreamToken: string): void {
 }
 
 // Precompute resource metadata URL
-const resourceMetadataUrl = (enableAuth ? getOAuthProtectedResourceMetadataUrl(new URL(MCP_SERVER_BASE_URL)) : "");
+const resourceMetadataUrl = enableAuth
+  ? getOAuthProtectedResourceMetadataUrl(new URL(MCP_SERVER_BASE_URL))
+  : '';
 
 // ======================================================================
 // Initialization of Express app
@@ -421,8 +433,8 @@ app.use(express.json());
 app.use(
   cors({
     origin: configData.MCP_SERVER_CORS_ORIGINS,
-    exposedHeaders: ['Mcp-Session-Id']
-  })
+    exposedHeaders: ['Mcp-Session-Id'],
+  }),
 );
 // Rate limiting to prevent abuse
 const limiter = rateLimit({
@@ -439,15 +451,15 @@ if (enableAuth) {
     mcpAuthMetadataRouter({
       oauthMetadata: {
         issuer: new URL(AUTHZ_SERVER_BASE_URL).toString(),
-        introspection_endpoint: "",
-        authorization_endpoint: "",
-        token_endpoint: "",
-        registration_endpoint: "", // optional
-        response_types_supported: ["code"]
+        introspection_endpoint: '',
+        authorization_endpoint: '',
+        token_endpoint: '',
+        registration_endpoint: '', // optional
+        response_types_supported: ['code'],
       },
       resourceServerUrl: new URL(MCP_SERVER_BASE_URL),
       scopesSupported: SCOPES_SUPPORTED,
-      resourceName: "Apache OFBiz MCP Server", // optional
+      resourceName: 'Apache OFBiz MCP Server', // optional
     }),
   );
   // Handle POST, GET and DELETE requests for authenticated client-to-server communication
@@ -464,9 +476,11 @@ if (enableAuth) {
 if (enableHttps) {
   try {
     // Resolve key/cert relative to the project if paths provided in config are relative
-    const base = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+    const base = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
     const keyPath = path.isAbsolute(TLS_KEY_PATH) ? TLS_KEY_PATH : path.join(base, TLS_KEY_PATH);
-    const certPath = path.isAbsolute(TLS_CERT_PATH) ? TLS_CERT_PATH : path.join(base, TLS_CERT_PATH);
+    const certPath = path.isAbsolute(TLS_CERT_PATH)
+      ? TLS_CERT_PATH
+      : path.join(base, TLS_CERT_PATH);
 
     const key = fs.readFileSync(keyPath);
     const cert = fs.readFileSync(certPath);
@@ -479,14 +493,18 @@ if (enableHttps) {
 
     const httpsServer = https.createServer(serverOptions, app);
     httpsServer.listen(SERVER_PORT, () => {
-      console.log(`MCP stateful Streamable HTTPS Server listening on port ${SERVER_PORT} with ${enableAuth ? 'authentication' : 'no authentication'}.`);
+      console.log(
+        `MCP stateful Streamable HTTPS Server listening on port ${SERVER_PORT} with ${enableAuth ? 'authentication' : 'no authentication'}.`,
+      );
     });
   } catch (err) {
-    console.error("Failed to start HTTPS server:", err);
+    console.error('Failed to start HTTPS server:', err);
     process.exit(1);
   }
 } else {
   app.listen(SERVER_PORT, () => {
-    console.log(`MCP stateful Streamable HTTP Server listening on port ${SERVER_PORT} with ${enableAuth ? 'authentication' : 'no authentication'}.`);
+    console.log(
+      `MCP stateful Streamable HTTP Server listening on port ${SERVER_PORT} with ${enableAuth ? 'authentication' : 'no authentication'}.`,
+    );
   });
 }

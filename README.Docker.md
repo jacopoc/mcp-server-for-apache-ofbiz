@@ -16,5 +16,6 @@ you'll want to build the image for that platform, e.g.:
 Then, push it to your registry, e.g. `docker push myregistry.com/apache-ofbiz-mcp-server`.
 
 ### References
-* [Docker's Node.js guide](https://docs.docker.com/language/nodejs/)
-* [Docker's Get Started Sharing guide](https://docs.docker.com/go/get-started-sharing/)
+
+- [Docker's Node.js guide](https://docs.docker.com/language/nodejs/)
+- [Docker's Get Started Sharing guide](https://docs.docker.com/go/get-started-sharing/)
