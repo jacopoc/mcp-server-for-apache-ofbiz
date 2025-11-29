@@ -18,6 +18,15 @@ export default [
       },
     },
 
+    settings: {
+      'import/resolver': {
+        typescript: {
+          alwaysTryTypes: true,
+          project: './tsconfig.json',
+        },
+      },
+    },
+
     plugins: {
       '@typescript-eslint': tseslint,
       import: importPlugin,
