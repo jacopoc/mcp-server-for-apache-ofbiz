@@ -452,16 +452,18 @@ app.use(limiter);
 
 if (enableAuth) {
   // Handle OAuth Protected Resource Metadata endpoint (RFC9728)
+  const oauthMetadata: OAuthMetadata = {
+    issuer: new URL(AUTHZ_SERVER_BASE_URL).toString(),
+    introspection_endpoint: '',
+    authorization_endpoint: '',
+    token_endpoint: '',
+    registration_endpoint: '', // optional
+    response_types_supported: ['code'],
+  };
+
   app.use(
     mcpAuthMetadataRouter({
-      oauthMetadata: {
-        issuer: new URL(AUTHZ_SERVER_BASE_URL).toString(),
-        introspection_endpoint: '',
-        authorization_endpoint: '',
-        token_endpoint: '',
-        registration_endpoint: '', // optional
-        response_types_supported: ['code'],
-      },
+      oauthMetadata,
       resourceServerUrl: new URL(MCP_SERVER_BASE_URL),
       scopesSupported: SCOPES_SUPPORTED,
       resourceName: 'Apache OFBiz MCP Server', // optional
