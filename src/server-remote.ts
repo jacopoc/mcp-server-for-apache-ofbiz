@@ -36,7 +36,7 @@ export const USER_AGENT = 'OFBiz-MCP-server';
 export const BACKEND_API_BASE = configData.BACKEND_API_BASE;
 const BACKEND_API_AUDIENCE = configData.BACKEND_API_AUDIENCE;
 const BACKEND_API_RESOURCE = configData.BACKEND_API_RESOURCE;
-const BACKEND_AUTH_TOKEN = () => getConfigData().BACKEND_AUTH_TOKEN;
+const BACKEND_ACCESS_TOKEN = () => getConfigData().BACKEND_ACCESS_TOKEN;
 const MCP_SERVER_BASE_URL = configData.MCP_SERVER_BASE_URL;
 const MCP_SERVER_DNS_REBINDING_PROTECTION_ALLOWED_HOSTS =
   configData.MCP_SERVER_DNS_REBINDING_PROTECTION_ALLOWED_HOSTS || [];
@@ -363,7 +363,7 @@ const handleMcpRequest = async (req: express.Request, res: express.Response) => 
         setDownstreamToken(sessionId, downstreamToken);
       } else {
         // No downstream token obtained from token exchange, fallback to static token
-        downstreamToken = BACKEND_AUTH_TOKEN();
+        downstreamToken = BACKEND_ACCESS_TOKEN();
       }
     }
     if (downstreamToken) {

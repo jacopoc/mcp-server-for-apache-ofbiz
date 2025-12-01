@@ -3,7 +3,7 @@
   "BACKEND_API_AUDIENCE": "https://demo-stable.ofbiz.apache.org",
   "BACKEND_API_RESOURCE": "https://demo-stable.ofbiz.apache.org",
   "BACKEND_API_AUTH": "https://demo-stable.ofbiz.apache.org/rest/auth/token",
-  "BACKEND_AUTH_TOKEN": "",
+  "BACKEND_ACCESS_TOKEN": "",
   "AUTHZ_SERVER_BASE_URL": "",
   "MCP_SERVER_BASE_URL": "",
   "SERVER_PORT": 3000,
