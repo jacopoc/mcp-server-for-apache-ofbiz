@@ -38,6 +38,10 @@ const BACKEND_API_AUDIENCE = configData.BACKEND_API_AUDIENCE;
 const BACKEND_API_RESOURCE = configData.BACKEND_API_RESOURCE;
 const BACKEND_AUTH_TOKEN = () => getConfigData().BACKEND_AUTH_TOKEN;
 const MCP_SERVER_BASE_URL = configData.MCP_SERVER_BASE_URL;
+const MCP_SERVER_DNS_REBINDING_PROTECTION_ALLOWED_HOSTS =
+  configData.MCP_SERVER_DNS_REBINDING_PROTECTION_ALLOWED_HOSTS || [];
+const MCP_SERVER_DNS_REBINDING_PROTECTION_ALLOWED_ORIGINS =
+  configData.MCP_SERVER_DNS_REBINDING_PROTECTION_ALLOWED_ORIGINS || [];
 const AUTHZ_SERVER_BASE_URL = configData.AUTHZ_SERVER_BASE_URL;
 const SCOPES_SUPPORTED = configData.SCOPES_SUPPORTED;
 const MCP_SERVER_CLIENT_ID = configData.MCP_SERVER_CLIENT_ID;
@@ -286,6 +290,8 @@ const handleMcpRequest = async (req: express.Request, res: express.Response) => 
     // Reuse existing transport
     transport = getTransport(sessionId)!;
   } else if (!sessionId && isInitializeRequest(req.body)) {
+    const enableDnsRebindingProtection =
+      MCP_SERVER_DNS_REBINDING_PROTECTION_ALLOWED_HOSTS.length > 0;
     // New initialization request
     transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: () => randomUUID(),
@@ -293,12 +299,9 @@ const handleMcpRequest = async (req: express.Request, res: express.Response) => 
         // Store the transport by session ID
         addSession(sessionId, transport);
       },
-      // FIXME:
-      // DNS rebinding protection is disabled by default for backwards compatibility. If you are running this server
-      // locally, make sure to set:
-      // enableDnsRebindingProtection: true,
-      // allowedHosts: ['127.0.0.1'],
-      // allowedOrigins: []
+      enableDnsRebindingProtection: enableDnsRebindingProtection,
+      allowedHosts: MCP_SERVER_DNS_REBINDING_PROTECTION_ALLOWED_HOSTS,
+      allowedOrigins: MCP_SERVER_DNS_REBINDING_PROTECTION_ALLOWED_ORIGINS,
     });
 
     // Clean up transport when closed
