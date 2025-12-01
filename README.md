@@ -29,6 +29,7 @@ Apache OFBiz® is a trademark of the [Apache Software Foundation](https://www.ap
 5. [Test the Local MCP Server](#test-the-local-mcp-server)
 6. [Test the Remote MCP Server](#test-the-remote-mcp-server)
 7. [Inspect the MCP servers](#inspect-the-mcp-servers)
+8. [Containerization with Docker](#containerization-with-docker)
 
 ---
 
@@ -192,3 +193,33 @@ npx @modelcontextprotocol/inspector
 ```
 
 This will open a browser window ready to test your MCP servers.
+
+## Containerization with Docker
+
+The following instructions describe how to containerize the application using Docker.
+
+First, build a Docker image: 
+
+`docker build -t mcp-server-for-apache-ofbiz .`.
+
+If your target environment uses a different CPU architecture than your development machine (for example, if you're working on an Apple M1 but deploying to an amd64 platform), make sure to build the image for the correct target architecture:
+
+`docker build --platform=linux/amd64 -t mcp-server-for-apache-ofbiz .`.
+
+After building the image, create a container
+
+`docker create --name my-mcp-server-for-apache-ofbiz -p 3000:3000 mcp-server-for-apache-ofbiz`
+
+and run it
+
+`docker start my-mcp-server-for-apache-ofbiz`.
+
+The MCP server will be available at http://localhost:3000/mcp.
+
+If you wish, you can push the image to your registry by running 
+
+`docker push myregistry.com/apache-ofbiz-mcp-server`.
+
+Alternatively, you can start the application with a single command by running:
+
+`docker compose -p mcp-server-for-apache-ofbiz up --build`.
