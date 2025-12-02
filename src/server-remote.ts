@@ -98,18 +98,24 @@ function getKey(header: JwtHeader, callback: SigningKeyCallback) {
   });
 }
 
-async function validateAccessToken(token: string): Promise<{
+export interface ValidationResult {
   valid: boolean;
   clientId?: string;
   scopes?: string[];
   userId?: string;
-  audience?: string;
+  audience?: string | string[];
   subjectToken?: string;
   downstreamToken?: string | null;
-}> {
+}
+
+export interface AuthenticatedRequest extends express.Request {
+  auth?: ValidationResult;
+}
+
+async function validateAccessToken(token: string): Promise<ValidationResult> {
   try {
     // Using JWT tokens, validate locally
-    const result = await new Promise<any>((resolve, reject) => {
+    const result = await new Promise<jwt.JwtPayload>((resolve, reject) => {
       // Decode the token header to obtain the algorithm
       const decodedToken = jwt.decode(token, { complete: true }) as { header?: JwtHeader } | null;
       const alg = decodedToken?.header?.alg;
@@ -125,7 +131,7 @@ async function validateAccessToken(token: string): Promise<{
         },
         (err, decoded) => {
           if (err) return reject(err);
-          resolve(decoded);
+          resolve(decoded as jwt.JwtPayload);
         },
       );
     });
@@ -194,9 +200,10 @@ const authenticateRequest = async (
     }
 
     // Attach user/token info to request for use in handlers
-    (req as any).auth = validationResult;
+    (req as AuthenticatedRequest).auth = validationResult;
     next();
   } catch (error) {
+    console.error('Authentication error:', error);
     res.status(500).json({
       jsonrpc: '2.0',
       error: {
@@ -228,8 +235,9 @@ async function getOAuthServerConfiguration(): Promise<oidc_client.Configuration>
       { execute: [oidc_client.allowInsecureRequests] },
     );
     return cachedAuthServerConfig;
-  } catch (err: any) {
-    console.error('Failed to initialize OpenID client:', err.message || err);
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error('Failed to initialize OpenID client:', errorMessage);
     throw new Error('Failed to initialize OAuth client for token exchange');
   }
 }
@@ -352,14 +360,15 @@ const handleMcpRequest = async (req: express.Request, res: express.Response) => 
 
   // Prepare downstream token
   // Get or perform token exchange if authentication is enabled
-  if (!(req as any).auth) {
-    (req as any).auth = { valid: !enableAuth, downstreamToken: null };
+  const authReq = req as AuthenticatedRequest;
+  if (!authReq.auth) {
+    authReq.auth = { valid: !enableAuth, downstreamToken: null };
   }
-  if (sessionId && (req as any).auth.valid) {
+  if (sessionId && authReq.auth.valid) {
     let downstreamToken = getDownstreamToken(sessionId);
     if (!downstreamToken) {
-      if ((req as any).auth.valid && MCP_SERVER_CLIENT_ID && MCP_SERVER_CLIENT_SECRET) {
-        downstreamToken = await performTokenExchange((req as any).auth.subjectToken);
+      if (enableAuth && authReq.auth.valid && MCP_SERVER_CLIENT_ID && MCP_SERVER_CLIENT_SECRET) {
+        downstreamToken = await performTokenExchange(authReq.auth.subjectToken!);
       }
       if (downstreamToken) {
         setDownstreamToken(sessionId, downstreamToken);
@@ -369,7 +378,7 @@ const handleMcpRequest = async (req: express.Request, res: express.Response) => 
       }
     }
     if (downstreamToken) {
-      (req as any).auth.downstreamToken = downstreamToken;
+      authReq.auth.downstreamToken = downstreamToken;
     }
   }
 

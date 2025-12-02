@@ -38,8 +38,10 @@ export default function (): ToolDefinition {
         },
       };
 
-      if ((request as any).authInfo.downstreamToken) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((request as any).authInfo?.downstreamToken) {
         requestOptions.headers['Authorization'] =
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           `Bearer ${(request as any).authInfo.downstreamToken}`;
       }
 
