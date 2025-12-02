@@ -6,8 +6,10 @@ import importPlugin from 'eslint-plugin-import';
 
 export default [
   {
-    files: ['**/*.ts'],
     ignores: ['build/**', 'node_modules/**'],
+  },
+  {
+    files: ['**/*.ts'],
 
     languageOptions: {
       parser: tsParser,
