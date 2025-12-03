@@ -6,7 +6,7 @@ import { loadTools } from './toolLoader.js';
 // Create server instance
 const server = new McpServer({
   name: 'Apache OFBiz MCP Server (stdio)',
-  version: '0.1.0',
+  version: '0.1.0'
 });
 
 // Load and register tools from external files

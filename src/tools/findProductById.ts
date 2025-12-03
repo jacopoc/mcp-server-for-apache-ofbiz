@@ -15,15 +15,15 @@ export default function (): ToolDefinition {
           .string()
           .min(2)
           .max(20)
-          .describe('ID of the product to find; must be between 2 and 20 characters long.'),
+          .describe('ID of the product to find; must be between 2 and 20 characters long.')
       },
       outputSchema: {
         productId: z.string().optional().describe('The unique identifier of the product.'),
         productName: z.string().optional().describe('The name of the product.'),
         internalName: z.string().optional().describe('The technical name of the product.'),
         description: z.string().optional().describe('A brief description of the product.'),
-        productTypeId: z.string().optional().describe('The type identifier of the product.'),
-      },
+        productTypeId: z.string().optional().describe('The type identifier of the product.')
+      }
     },
     handler: async ({ id }: { id: string }, request: express.Request) => {
       const idParam = { idToFind: id };
@@ -34,8 +34,8 @@ export default function (): ToolDefinition {
         method: 'GET',
         headers: {
           'User-Agent': USER_AGENT,
-          Accept: 'application/json',
-        },
+          Accept: 'application/json'
+        }
       };
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -57,16 +57,16 @@ export default function (): ToolDefinition {
           productName: responseData.data.product.productName || '',
           internalName: responseData.data.product.internalName || '',
           description: responseData.data.product.description || '',
-          productTypeId: responseData.data.product.productTypeId || '',
+          productTypeId: responseData.data.product.productTypeId || ''
         };
         return {
           content: [
             {
               type: 'text',
-              text: JSON.stringify(structuredContent),
-            },
+              text: JSON.stringify(structuredContent)
+            }
           ],
-          structuredContent: structuredContent,
+          structuredContent: structuredContent
         };
       } catch (error) {
         console.error('Error making backend request:', error);
@@ -74,12 +74,12 @@ export default function (): ToolDefinition {
           content: [
             {
               type: 'text',
-              text: `Error finding product: ${error instanceof Error ? error.message : 'Unknown error'}`,
-            },
+              text: `Error finding product: ${error instanceof Error ? error.message : 'Unknown error'}`
+            }
           ],
-          structuredContent: {},
+          structuredContent: {}
         };
       }
-    },
+    }
   };
 }

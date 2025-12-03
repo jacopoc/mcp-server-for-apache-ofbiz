@@ -12,7 +12,7 @@ import jwksClient from 'jwks-rsa';
 import * as oidc_client from 'openid-client';
 import {
   mcpAuthMetadataRouter,
-  getOAuthProtectedResourceMetadataUrl,
+  getOAuthProtectedResourceMetadataUrl
 } from '@modelcontextprotocol/sdk/server/auth/router.js';
 import { OAuthMetadata } from '@modelcontextprotocol/sdk/shared/auth.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -24,7 +24,7 @@ import { loadTools } from './toolLoader.js';
 // Load configuration
 const configPath = path.resolve(
   path.dirname(new URL(import.meta.url).pathname),
-  '../config/config.json',
+  '../config/config.json'
 );
 
 const configData = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
@@ -80,7 +80,7 @@ const client = !enableAuth
       jwksUri: await getJwksUri(AUTHZ_SERVER_BASE_URL),
       cache: true, // enable local caching
       cacheMaxEntries: 5, // maximum number of keys stored
-      cacheMaxAge: 10 * 60 * 1000, // 10 minutes
+      cacheMaxAge: 10 * 60 * 1000 // 10 minutes
     });
 
 // Function to get the public key from the JWT's kid
@@ -127,12 +127,12 @@ async function validateAccessToken(token: string): Promise<ValidationResult> {
         {
           algorithms: [alg as jwt.Algorithm],
           audience: MCP_SERVER_CLIENT_ID,
-          issuer: AUTHZ_SERVER_BASE_URL,
+          issuer: AUTHZ_SERVER_BASE_URL
         },
         (err, decoded) => {
           if (err) return reject(err);
           resolve(decoded as jwt.JwtPayload);
-        },
+        }
       );
     });
 
@@ -143,7 +143,7 @@ async function validateAccessToken(token: string): Promise<ValidationResult> {
       userId: result.sub,
       audience: result.aud,
       subjectToken: token,
-      downstreamToken: null,
+      downstreamToken: null
     };
   } catch (error) {
     console.error('Token validation error:', error);
@@ -155,7 +155,7 @@ async function validateAccessToken(token: string): Promise<ValidationResult> {
 const authenticateRequest = async (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction,
+  next: express.NextFunction
 ) => {
   const authHeader = req.headers.authorization;
 
@@ -168,9 +168,9 @@ const authenticateRequest = async (
         jsonrpc: '2.0',
         error: {
           code: -32001,
-          message: 'Authorization required',
+          message: 'Authorization required'
         },
-        id: null,
+        id: null
       });
     return;
   }
@@ -186,15 +186,15 @@ const authenticateRequest = async (
         .status(401)
         .set(
           'WWW-Authenticate',
-          `Bearer realm="mcp", error="invalid_token", as_uri="${resourceMetadataUrl}"`,
+          `Bearer realm="mcp", error="invalid_token", as_uri="${resourceMetadataUrl}"`
         )
         .json({
           jsonrpc: '2.0',
           error: {
             code: -32001,
-            message: 'Invalid or expired token',
+            message: 'Invalid or expired token'
           },
-          id: null,
+          id: null
         });
       return;
     }
@@ -208,9 +208,9 @@ const authenticateRequest = async (
       jsonrpc: '2.0',
       error: {
         code: -32603,
-        message: 'Internal server error during authentication',
+        message: 'Internal server error during authentication'
       },
-      id: null,
+      id: null
     });
   }
 };
@@ -232,7 +232,7 @@ async function getOAuthServerConfiguration(): Promise<oidc_client.Configuration>
       MCP_SERVER_CLIENT_ID,
       MCP_SERVER_CLIENT_SECRET,
       undefined,
-      { execute: [oidc_client.allowInsecureRequests] },
+      { execute: [oidc_client.allowInsecureRequests] }
     );
     return cachedAuthServerConfig;
   } catch (err: unknown) {
@@ -262,8 +262,8 @@ async function performTokenExchange(subjectToken: string): Promise<string | null
         requested_token_type: 'urn:ietf:params:oauth:token-type:access_token',
         scope: TOKEN_EXCHANGE_SCOPE.join(' '),
         resource: BACKEND_API_RESOURCE,
-        audience: BACKEND_API_AUDIENCE,
-      },
+        audience: BACKEND_API_AUDIENCE
+      }
     );
 
     // Verify the response contains the expected access token
@@ -311,7 +311,7 @@ const handleMcpRequest = async (req: express.Request, res: express.Response) => 
       },
       enableDnsRebindingProtection: enableDnsRebindingProtection,
       allowedHosts: MCP_SERVER_DNS_REBINDING_PROTECTION_ALLOWED_HOSTS,
-      allowedOrigins: MCP_SERVER_DNS_REBINDING_PROTECTION_ALLOWED_ORIGINS,
+      allowedOrigins: MCP_SERVER_DNS_REBINDING_PROTECTION_ALLOWED_ORIGINS
     });
 
     // Clean up transport when closed
@@ -322,7 +322,7 @@ const handleMcpRequest = async (req: express.Request, res: express.Response) => 
     };
     const server = new McpServer({
       name: 'Apache OFBiz MCP Server (Streamable HTTP)',
-      version: '0.1.0',
+      version: '0.1.0'
     });
 
     // Load and register tools from external files
@@ -351,9 +351,9 @@ const handleMcpRequest = async (req: express.Request, res: express.Response) => 
       jsonrpc: '2.0',
       error: {
         code: -32000,
-        message: 'Bad Request: No valid session ID provided',
+        message: 'Bad Request: No valid session ID provided'
       },
-      id: null,
+      id: null
     });
     return;
   }
@@ -447,15 +447,15 @@ app.use(express.json());
 app.use(
   cors({
     origin: configData.MCP_SERVER_CORS_ORIGINS,
-    exposedHeaders: ['Mcp-Session-Id'],
-  }),
+    exposedHeaders: ['Mcp-Session-Id']
+  })
 );
 // Rate limiting to prevent abuse
 const limiter = rateLimit({
   windowMs: RATE_LIMIT_WINDOW_MS,
   max: RATE_LIMIT_MAX_REQUESTS,
   standardHeaders: true,
-  legacyHeaders: false,
+  legacyHeaders: false
 });
 app.use(limiter);
 
@@ -467,7 +467,7 @@ if (enableAuth) {
     authorization_endpoint: '',
     token_endpoint: '',
     registration_endpoint: '', // optional
-    response_types_supported: ['code'],
+    response_types_supported: ['code']
   };
 
   app.use(
@@ -475,8 +475,8 @@ if (enableAuth) {
       oauthMetadata,
       resourceServerUrl: new URL(MCP_SERVER_BASE_URL),
       scopesSupported: SCOPES_SUPPORTED,
-      resourceName: 'Apache OFBiz MCP Server', // optional
-    }),
+      resourceName: 'Apache OFBiz MCP Server' // optional
+    })
   );
   // Handle POST, GET and DELETE requests for authenticated client-to-server communication
   app.post('/mcp', authenticateRequest, handleMcpRequest);
@@ -504,13 +504,13 @@ if (enableHttps) {
     const serverOptions: https.ServerOptions = {
       key,
       cert,
-      passphrase: TLS_KEY_PASSPHRASE,
+      passphrase: TLS_KEY_PASSPHRASE
     };
 
     const httpsServer = https.createServer(serverOptions, app);
     httpsServer.listen(SERVER_PORT, () => {
       console.log(
-        `MCP stateful Streamable HTTPS Server listening on port ${SERVER_PORT} with ${enableAuth ? 'authentication' : 'no authentication'}.`,
+        `MCP stateful Streamable HTTPS Server listening on port ${SERVER_PORT} with ${enableAuth ? 'authentication' : 'no authentication'}.`
       );
     });
   } catch (err) {
@@ -520,7 +520,7 @@ if (enableHttps) {
 } else {
   app.listen(SERVER_PORT, () => {
     console.log(
-      `MCP stateful Streamable HTTP Server listening on port ${SERVER_PORT} with ${enableAuth ? 'authentication' : 'no authentication'}.`,
+      `MCP stateful Streamable HTTP Server listening on port ${SERVER_PORT} with ${enableAuth ? 'authentication' : 'no authentication'}.`
     );
   });
 }
