@@ -1,4 +1,5 @@
 {
+  "TOOLS_FOLDER_PATH": "./build/tools",
   "BACKEND_API_BASE": "https://demo-stable.ofbiz.apache.org",
   "BACKEND_API_AUDIENCE": "https://demo-stable.ofbiz.apache.org",
   "BACKEND_API_RESOURCE": "https://demo-stable.ofbiz.apache.org",
