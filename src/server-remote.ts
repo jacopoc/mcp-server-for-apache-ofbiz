@@ -22,10 +22,13 @@ import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
 import { loadTools } from './toolLoader.js';
 
 // Load configuration
-const configPath = path.resolve(
-  path.dirname(new URL(import.meta.url).pathname),
-  '../config/config.json'
-);
+// Require config path as command-line argument
+if (!process.argv[2]) {
+  console.error('Error: Path to config file is required as a command-line argument');
+  console.error('Usage: node server-remote.js <path-to-config-file>');
+  process.exit(1);
+}
+const configPath = path.resolve(process.argv[2]);
 
 const configData = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 
