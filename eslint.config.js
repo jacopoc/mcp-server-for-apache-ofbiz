@@ -6,7 +6,7 @@ import importPlugin from 'eslint-plugin-import';
 
 export default [
   {
-    ignores: ['build/**', 'node_modules/**'],
+    ignores: ['build/**', 'node_modules/**']
   },
   {
     files: ['**/*.ts'],
@@ -16,23 +16,23 @@ export default [
       parserOptions: {
         project: './tsconfig.json',
         sourceType: 'module',
-        ecmaVersion: 'latest',
-      },
+        ecmaVersion: 'latest'
+      }
     },
 
     settings: {
       'import/resolver': {
         typescript: {
           alwaysTryTypes: true,
-          project: './tsconfig.json',
-        },
-      },
+          project: './tsconfig.json'
+        }
+      }
     },
 
     plugins: {
       '@typescript-eslint': tseslint,
       import: importPlugin,
-      prettier: eslintPluginPrettier,
+      prettier: eslintPluginPrettier
     },
 
     rules: {
@@ -46,8 +46,8 @@ export default [
         'warn',
         {
           groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-          'newlines-between': 'always',
-        },
+          'newlines-between': 'always'
+        }
       ],
 
       // ---- Prettier ----
@@ -55,7 +55,7 @@ export default [
       'prettier/prettier': 'error',
 
       // ---- Disable rules overridden by Prettier ----
-      ...prettier.rules,
-    },
-  },
+      ...prettier.rules
+    }
+  }
 ];

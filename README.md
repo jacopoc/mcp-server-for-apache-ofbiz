@@ -198,7 +198,7 @@ This will open a browser window ready to test your MCP servers.
 
 The following instructions describe how to containerize the application using Docker.
 
-First, build a Docker image: 
+First, build a Docker image:
 
 `docker build -t mcp-server-for-apache-ofbiz .`.
 
@@ -216,7 +216,7 @@ and run it
 
 The MCP server will be available at http://localhost:3000/mcp.
 
-If you wish, you can push the image to your registry by running 
+If you wish, you can push the image to your registry by running
 
 `docker push myregistry.com/apache-ofbiz-mcp-server`.
 
