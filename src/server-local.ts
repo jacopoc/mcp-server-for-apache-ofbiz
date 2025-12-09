@@ -1,6 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
+import { TOOLS_FOLDER_PATH } from './server-remote.js';
 import { loadTools } from './toolLoader.js';
 
 // Create server instance
@@ -12,7 +13,7 @@ const server = new McpServer({
 // Load and register tools from external files
 async function registerTools() {
   try {
-    const tools = await loadTools();
+    const tools = await loadTools(TOOLS_FOLDER_PATH);
 
     for (const tool of tools) {
       server.registerTool(tool.name, tool.metadata, tool.handler);

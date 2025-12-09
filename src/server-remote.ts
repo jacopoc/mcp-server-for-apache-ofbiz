@@ -39,6 +39,7 @@ function getConfigData() {
 
 export const USER_AGENT = 'OFBiz-MCP-server';
 export const BACKEND_API_BASE = configData.BACKEND_API_BASE;
+export const TOOLS_FOLDER_PATH = configData.TOOLS_FOLDER_PATH || './build/tools';
 const BACKEND_API_AUDIENCE = configData.BACKEND_API_AUDIENCE;
 const BACKEND_API_RESOURCE = configData.BACKEND_API_RESOURCE;
 const BACKEND_ACCESS_TOKEN = () => getConfigData().BACKEND_ACCESS_TOKEN;
@@ -331,7 +332,7 @@ const handleMcpRequest = async (req: express.Request, res: express.Response) => 
     // Load and register tools from external files
     async function registerTools() {
       try {
-        const tools = await loadTools();
+        const tools = await loadTools(TOOLS_FOLDER_PATH);
 
         for (const tool of tools) {
           server.registerTool(tool.name, tool.metadata, tool.handler);

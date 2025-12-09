@@ -15,8 +15,8 @@ export interface ToolDefinition {
   handler: (params: any, request: any) => Promise<any>;
 }
 
-export async function loadTools(): Promise<ToolDefinition[]> {
-  const toolsDir = path.resolve(path.dirname(new URL(import.meta.url).pathname), './tools');
+export async function loadTools(toolsFolderPath: string): Promise<ToolDefinition[]> {
+  const toolsDir = path.resolve(process.cwd(), toolsFolderPath);
 
   if (!fs.existsSync(toolsDir)) {
     console.warn(`Tools directory not found: ${toolsDir}`);
