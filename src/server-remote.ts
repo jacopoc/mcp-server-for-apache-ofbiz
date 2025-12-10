@@ -325,8 +325,8 @@ const handleMcpRequest = async (req: express.Request, res: express.Response) => 
       }
     };
     const server = new McpServer({
-      name: 'Apache OFBiz MCP Server (Streamable HTTP)',
-      version: '0.1.0'
+      name: 'MCP Server for Apache OFBiz',
+      version: '1.3.0'
     });
 
     // Load and register tools from external files
@@ -479,7 +479,7 @@ if (enableAuth) {
       oauthMetadata,
       resourceServerUrl: new URL(MCP_SERVER_BASE_URL),
       scopesSupported: SCOPES_SUPPORTED,
-      resourceName: 'Apache OFBiz MCP Server' // optional
+      resourceName: 'MCP Server for Apache OFBiz' // optional
     })
   );
   // Handle POST, GET and DELETE requests for authenticated client-to-server communication
