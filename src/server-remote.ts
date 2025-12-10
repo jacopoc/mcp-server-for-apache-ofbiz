@@ -21,15 +21,16 @@ import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
 
 import { loadTools } from './toolLoader.js';
 
-// Load configuration
-// Require config path as command-line argument
-if (!process.argv[2]) {
-  console.error('Error: Path to config file is required as a command-line argument');
-  console.error('Usage: node server-remote.js <path-to-config-file>');
+// Require config and tools paths as command-line arguments
+if (!process.argv[2] || !process.argv[3]) {
+  console.error(
+    'Error: Paths to config folder and tools folder are mandatory command-line arguments'
+  );
+  console.error('Usage: node server-remote.js  <path-to-config-folder> <path-to-tools-folder>');
   process.exit(1);
 }
-const configPath = path.resolve(process.argv[2]);
 
+const configPath = path.resolve(process.argv[2], 'config.json');
 const configData = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 
 // Always read the latest config from the file system
@@ -37,9 +38,9 @@ function getConfigData() {
   return JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 }
 
+export const TOOLS_FOLDER_PATH = path.resolve(process.argv[3]);
 export const USER_AGENT = 'OFBiz-MCP-server';
 export const BACKEND_API_BASE = configData.BACKEND_API_BASE;
-export const TOOLS_FOLDER_PATH = configData.TOOLS_FOLDER_PATH || './build/tools';
 const BACKEND_API_AUDIENCE = configData.BACKEND_API_AUDIENCE;
 const BACKEND_API_RESOURCE = configData.BACKEND_API_RESOURCE;
 const BACKEND_ACCESS_TOKEN = () => getConfigData().BACKEND_ACCESS_TOKEN;
