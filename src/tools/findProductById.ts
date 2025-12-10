@@ -18,7 +18,7 @@ export default function (): ToolDefinition {
           .describe('ID of the product to find; must be between 2 and 20 characters long.')
       },
       outputSchema: {
-        productId: z.string().optional().describe('The unique identifier of the product.'),
+        productId: z.string().describe('The unique identifier of the product.'),
         productName: z.string().optional().describe('The name of the product.'),
         internalName: z.string().optional().describe('The technical name of the product.'),
         description: z.string().optional().describe('A brief description of the product.'),
@@ -52,6 +52,9 @@ export default function (): ToolDefinition {
         }
 
         const responseData = await response.json();
+        if (!responseData.data || !responseData.data.product) {
+          throw new Error('Product not found.');
+        }
         const structuredContent = {
           productId: responseData.data.product.productId || '',
           productName: responseData.data.product.productName || '',
@@ -77,7 +80,7 @@ export default function (): ToolDefinition {
               text: `Error finding product: ${error instanceof Error ? error.message : 'Unknown error'}`
             }
           ],
-          structuredContent: {}
+          isError: true
         };
       }
     }
