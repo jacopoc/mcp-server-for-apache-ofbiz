@@ -26,7 +26,7 @@ if (!process.argv[2] || !process.argv[3]) {
   console.error(
     'Error: Paths to config folder and tools folder are mandatory command-line arguments'
   );
-  console.error('Usage: node server-remote.js  <path-to-config-folder> <path-to-tools-folder>');
+  console.error('Usage: node server.js  <path-to-config-folder> <path-to-tools-folder>');
   process.exit(1);
 }
 

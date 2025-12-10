@@ -34,7 +34,7 @@ Apache OFBiz® is a trademark of the [Apache Software Foundation](https://www.ap
 
 ## Features
 
-The project includes an MCP server (`src/server-remote.ts`) that communicates with the MCP client via MCP Streamable HTTP transport.
+The project includes an MCP server (`src/server.ts`) that communicates with the MCP client via MCP Streamable HTTP transport.
 
 The server dynamically discovers MCP tools contained in the `tools` directory, whose path is specified as a command-line argument when the server is lauched.
 
@@ -98,7 +98,7 @@ mcp-server-for-apache-ofbiz/
 ├── config/
 │   └── config.json               # Server configuration (backend API base, auth token, etc.)
 ├── src/
-│   ├── server-remote.ts          # MCP server (Streamable HTTP transport)
+│   ├── server.ts          # MCP server (Streamable HTTP transport)
 │   ├── toolLoader.ts             # Loader of tool definitions from "tools/"
 │   └── tools/
 │       └── findProductById.ts    # Example tool calling an Apache OFBiz REST endpoint
@@ -121,7 +121,7 @@ npm run build
 Start the server:
 
 ```sh
-node ./build/server-remote.js ./config ./build/tools
+node ./build/server.js ./config ./build/tools
 ```
 
 You can test the MCP server with the free version of **Claude Desktop**.

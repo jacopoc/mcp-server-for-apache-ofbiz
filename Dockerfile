@@ -65,4 +65,4 @@ ENV PATH_TO_CONFIG_FOLDER=''
 ENV PATH_TO_TOOLS_FOLDER=''
 
 # Run the application.
-ENTRYPOINT ["node", "build/server-remote.js"]
+ENTRYPOINT ["node", "build/server.js"]

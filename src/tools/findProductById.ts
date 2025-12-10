@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import express from 'express';
 
-import { BACKEND_API_BASE, USER_AGENT } from '../server-remote.js';
+import { BACKEND_API_BASE, USER_AGENT } from '../server.js';
 import type { ToolDefinition } from '../toolLoader.js';
 
 export default function (): ToolDefinition {
