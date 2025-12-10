@@ -158,10 +158,10 @@ After updating the configuration file, launch Claude Desktop and try the followi
 Start the server:
 
 ```sh
-node build/server-remote.js
+node ./build/server-remote.js ./config ./build/tools
 ```
 
-You can test the local MCP server with the free version of **Claude Desktop**.
+You can test the MCP server with the free version of **Claude Desktop**.
 
 Edit or create the Claude Desktop configuration file:
 
@@ -169,7 +169,7 @@ Edit or create the Claude Desktop configuration file:
 ~/Library/Application\ Support/Claude/claude_desktop_config.json
 ```
 
-Add your local MCP server configuration:
+Add your MCP server configuration:
 
 ```json
 {
@@ -200,26 +200,32 @@ The following instructions describe how to containerize the application using Do
 
 First, build a Docker image:
 
-`docker build -t mcp-server-for-apache-ofbiz .`.
+```sh
+docker build -t mcp-server-for-apache-ofbiz .
+```
 
 If your target environment uses a different CPU architecture than your development machine (for example, if you're working on an Apple M1 but deploying to an amd64 platform), make sure to build the image for the correct target architecture:
 
-`docker build --platform=linux/amd64 -t mcp-server-for-apache-ofbiz .`.
+```sh
+docker build --platform=linux/amd64 -t mcp-server-for-apache-ofbiz .
+```
 
 After building the image, create a container
 
-`docker create --name my-mcp-server-for-apache-ofbiz -p 3000:3000 mcp-server-for-apache-ofbiz`
+```sh
+docker create --name my-mcp-server-for-apache-ofbiz  -p 3000:3000 -v ${PWD}/config:/usr/src/app/config -v ${PWD}/build/tools:/usr/src/app/build/tools test1 ./config ./build/tools
+```
 
 and run it
 
-`docker start my-mcp-server-for-apache-ofbiz`.
+```sh
+docker start my-mcp-server-for-apache-ofbiz
+```
 
 The MCP server will be available at http://localhost:3000/mcp.
 
 If you wish, you can push the image to your registry by running
 
-`docker push myregistry.com/apache-ofbiz-mcp-server`.
-
-Alternatively, you can start the application with a single command by running:
-
-`docker compose -p mcp-server-for-apache-ofbiz up --build`.
+```sh
+docker push myregistry.com/apache-ofbiz-mcp-server
+```
