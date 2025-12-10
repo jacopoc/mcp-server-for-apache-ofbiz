@@ -51,7 +51,6 @@ USER node
 
 # Copy package.json so that package manager commands can be used.
 COPY package.json .
-COPY ./config ./config
 
 # Copy the production dependencies from the deps stage and also
 # the built application from the build stage into the image.
@@ -61,5 +60,9 @@ COPY --from=build /usr/src/app/build ./build
 # Expose the port that the application listens on.
 EXPOSE 3000
 
+# Define environment variables for the paths to the configuration and tool folders.
+ENV PATH_TO_CONFIG_FOLDER=''
+ENV PATH_TO_TOOLS_FOLDER=''
+
 # Run the application.
-CMD node build/server-remote.js
+ENTRYPOINT ["node", "build/server-remote.js"]
