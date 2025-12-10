@@ -49,7 +49,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "mcp_server_for_apache_ofbiz-local": "./build/server-local.js",
-    "mcp_server_for_apache_ofbiz-remote": "./build/server-remote.js"
+    "mcp_server_for_apache_ofbiz": "./build/server-remote.js"
   }
 }

@@ -7,7 +7,7 @@ This project provides a prototype implementation of a Model Context Protocol (MC
 
 This project can be used as a platform to implement your own tools and enable generative AI applications to interact with any backend system that exposes REST API endpoints, such as [**Apache OFBiz**](https://ofbiz.apache.org) or [**Moqui**](https://www.moqui.org).
 
-The server is implemented in two versions, one that runs as a local MCP server (stdio transport) and one that runs as a remote MCP server (Streamable HTTP transport).
+The server implements an MCP server with Streamable HTTP transport.
 
 The project leverages the **Anthropic TypeScript SDK**, and requires:
 
@@ -26,27 +26,23 @@ Apache OFBiz® is a trademark of the [Apache Software Foundation](https://www.ap
 2. [Configuration](#configuration)
 3. [Project Structure](#project-structure)
 4. [Build the Project](#build-the-project)
-5. [Test the Local MCP Server](#test-the-local-mcp-server)
-6. [Test the Remote MCP Server](#test-the-remote-mcp-server)
-7. [Inspect the MCP servers](#inspect-the-mcp-servers)
-8. [Containerization with Docker](#containerization-with-docker)
+5. [Test the Remote MCP Server](#test-the-mcp-server)
+6. [Inspect the MCP servers](#inspect-the-mcp-servers)
+7. [Containerization with Docker](#containerization-with-docker)
 
 ---
 
 ## Features
 
-The project includes two alternative MCP servers:
+The project includes an MCP server (`src/server-remote.ts`) that communicates with the MCP client via MCP Streamable HTTP transport.
 
-- **Local MCP server** (`src/server-local.ts`) — communicates with the MCP client via stdio transport.
-- **Remote MCP server** (`src/server-remote.ts`) — communicates with the MCP client via MCP Streamable HTTP transport.
-
-The servers dynamically discover MCP tools contained in the `tools` directory.
+The server dynamically discovers MCP tools contained in the `tools` directory, whose path is specified as a command-line argument when the server is lauched.
 
 Each tool is defined and implemented in its own file. For example, the sample tool `tools/findProductById.ts` invokes an endpoint in Apache OFBiz to retrieve product information for a given product ID. This works with an out-of-the-box (OOTB) OFBiz instance with the `rest-api` plugin installed.
 
 New tools can be published by simply including their definition files in the `tools` folder.
 
-The remote server:
+The server:
 
 - is compliant with the latest MCP specifications (2025-06-18)
 - supports authorization according to the MCP recommendations (OAuth Authorization Code Flow with support for Metadata discovery, Dynamic Client Registration, etc...)
@@ -102,8 +98,7 @@ mcp-server-for-apache-ofbiz/
 ├── config/
 │   └── config.json               # Server configuration (backend API base, auth token, etc.)
 ├── src/
-│   ├── server-local.ts           # Local MCP server (stdio transport)
-│   ├── server-remote.ts          # Remote MCP server (Streamable HTTP transport)
+│   ├── server-remote.ts          # MCP server (Streamable HTTP transport)
 │   ├── toolLoader.ts             # Loader of tool definitions from "tools/"
 │   └── tools/
 │       └── findProductById.ts    # Example tool calling an Apache OFBiz REST endpoint
@@ -121,39 +116,7 @@ npm install
 npm run build
 ```
 
-## Test the Local MCP Server
-
-You can test the local MCP server with the free version of **Claude Desktop**.
-
-Edit or create the Claude Desktop configuration file:
-
-```sh
-~/Library/Application\ Support/Claude/claude_desktop_config.json
-```
-
-Add your local MCP server configuration:
-
-```json
-{
-  "mcpServers": {
-    "Apache OFBiz": {
-      "command": "node",
-      "args": ["PATH_TO/mcp-server-for-apache-ofbiz/build/server-local.js"]
-    }
-  }
-}
-```
-
-After updating the configuration file, launch Claude Desktop and try the following sample prompts:
-
-- _"Can you provide some information about the product WG-1111?"_
-- _"Create a SEO friendly description for the product with ID GZ-1000"_
-- _"Can you provide some information about a product?"_  
-  (Claude will ask for a product ID before invoking the tool.)
-- _"Can you compare two products?"_  
-  (Claude will ask for two product IDs, invoke the tool twice, and then compare the results.)
-
-## Test the Remote MCP Server
+## Test the MCP Server
 
 Start the server:
 
@@ -181,6 +144,14 @@ Add your MCP server configuration:
   }
 }
 ```
+After updating the configuration file, launch Claude Desktop and try the following sample prompts:
+
+- _"Can you provide some information about the product WG-1111?"_
+- _"Create a SEO friendly description for the product with ID GZ-1000"_
+- _"Can you provide some information about a product?"_  
+  (Claude will ask for a product ID before invoking the tool.)
+- _"Can you compare two products?"_  
+  (Claude will ask for two product IDs, invoke the tool twice, and then compare the results.)
 
 ## Inspect the MCP servers
 
