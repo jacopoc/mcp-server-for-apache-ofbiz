@@ -58,14 +58,16 @@ The server:
 
 Server configuration is managed via `config/config.json`, which defines:
 
-- **`MCP_SERVER_BASE_URL`** — the base URL of the MCP server (Protected Resource Server in OAuth)
 - **`SERVER_PORT`** — the port on which the MCP server listens for client connections (required only for the remote server)
 - **`TLS_CERT_PATH`** — path to the file containing the certificate for TLS
 - **`TLS_KEY_PATH`** — path to the file containing the private key for TLS
 - **`TLS_KEY_PASSPHRASE`** — (optional) passphrase for the **`TLS_KEY_PATH`** file
 - **`MCP_SERVER_CORS_ORIGINS`** — CORS origin allowed
+- **`MCP_SERVER_DNS_REBINDING_PROTECTION_ALLOWED_HOSTS`** - list of allowed values for request header `Host` for DNS rebinding protection
+- **`MCP_SERVER_DNS_REBINDING_PROTECTION_ALLOWED_ORIGINS`** - list of allowed values for request header `Origin` for DNS rebinding protection
 - **`RATE_LIMIT_WINDOW_MS`** — time window in ms for the requests rate limiting feature
 - **`RATE_LIMIT_MAX_REQUESTS`** — max number of requests allowed in the time window
+- **`MCP_SERVER_BASE_URL`** — the base URL of the MCP server used to get OAuth metadata (Protected Resource Server in OAuth)
 - **`AUTHZ_SERVER_BASE_URL`** — the base URL of the Authorization (Authz) server (OAuth)
 - **`SCOPES_SUPPORTED`** — the scopes that the MCP client can request
 - **`BACKEND_API_BASE`** — the base URL for backend REST API calls
@@ -83,11 +85,7 @@ If either **`MCP_SERVER_BASE_URL`** or **`AUTHZ_SERVER_BASE_URL`** are not set, 
 
 If authorization is enabled, but either **`MCP_SERVER_CLIENT_ID`** or **`MCP_SERVER_CLIENT_SECRET`** are not set, token exchange is disabled.
 
-If token exchange is not enabled, the access token for the OFBiz API can be set **`BACKEND_AUTH_TOKEN`** and can be easily generated and set by running the script:
-
-`update_token.sh <user> <password>`
-
-This script retrieves a JWT for an OOTB OFBiz instance, as specified by **`BACKEND_API_AUTH`** (e.g., `https://demo-stable.ofbiz.apache.org/rest/auth/token`).
+If token exchange is not enabled, the access token for the OFBiz API can be set in **`BACKEND_AUTH_TOKEN`**.
 
 ---
 
@@ -118,7 +116,16 @@ npm run build
 
 ## Test the MCP Server
 
-Start the server:
+With the configuration file provided (`./config/config.json`) the MCP server operates over a plain HTTP connection at `http://localhost:3000/mcp`, with authorization and token exchange disabled, and invokes the APIs of one of the Apache OFBiz demo instances.
+
+The access token required for the OFBiz APIs can be generated and set in **`BACKEND_AUTH_TOKEN`** by running the utility script
+
+`update_token.sh <user> <password>`
+
+with, e.g., `admin` and `ofbiz`, as user and password, respectively.
+This script retrieves a JWT for an OOTB OFBiz instance from `https://demo-stable.ofbiz.apache.org/rest/auth/token`, as specified in **`BACKEND_API_AUTH`**.
+
+Start the server specifying the paths to the configuration and tools folders:
 
 ```sh
 node ./build/server.js ./config ./build/tools
@@ -144,6 +151,7 @@ Add your MCP server configuration:
   }
 }
 ```
+
 After updating the configuration file, launch Claude Desktop and try the following sample prompts:
 
 - _"Can you provide some information about the product WG-1111?"_
@@ -153,9 +161,9 @@ After updating the configuration file, launch Claude Desktop and try the followi
 - _"Can you compare two products?"_  
   (Claude will ask for two product IDs, invoke the tool twice, and then compare the results.)
 
-## Inspect the MCP servers
+## Inspect the MCP server
 
-You can use Anthropic’s **Inspector** to easily test interactions with the local and remote MCP servers. You can do this also when a remote server is executed in your local host or private network, without requiring valid certificates or deploying the server on a publicly accessible host.
+You can use Anthropic’s **Inspector** to easily test interactions with the MCP server.
 
 Run (and install) the Inspector with:
 
@@ -167,30 +175,30 @@ This will open a browser window ready to test your MCP servers.
 
 ## Containerization with Docker
 
-The following instructions describe how to containerize the application using Docker.
+The following instructions describe how to containerize the MCP server using Docker and the Dockerfile provided.
 
-First, build a Docker image:
+First, build a Docker image named, e.g., `mcp4ofbiz-image`:
 
 ```sh
-docker build -t mcp-server-for-apache-ofbiz .
+docker build -t mcp4ofbiz-image .
 ```
 
 If your target environment uses a different CPU architecture than your development machine (for example, if you're working on an Apple M1 but deploying to an amd64 platform), make sure to build the image for the correct target architecture:
 
 ```sh
-docker build --platform=linux/amd64 -t mcp-server-for-apache-ofbiz .
+docker build --platform=linux/amd64 -t mcp4ofbiz-image .
 ```
 
-After building the image, create a container
+After building the image, create a container, e.g., named `mcp4ofbiz-container`
 
 ```sh
-docker create --name my-mcp-server-for-apache-ofbiz  -p 3000:3000 -v ${PWD}/config:/usr/src/app/config -v ${PWD}/build/tools:/usr/src/app/build/tools test1 ./config ./build/tools
+docker create --name mcp4ofbiz-container -p 3000:3000 -v ${PWD}/config:/usr/src/app/config -v ${PWD}/build/tools:/usr/src/app/build/tools mcp4ofbiz-image ./config ./build/tools
 ```
 
 and run it
 
 ```sh
-docker start my-mcp-server-for-apache-ofbiz
+docker start mcp4ofbiz-container
 ```
 
 The MCP server will be available at http://localhost:3000/mcp.
@@ -198,5 +206,5 @@ The MCP server will be available at http://localhost:3000/mcp.
 If you wish, you can push the image to your registry by running
 
 ```sh
-docker push myregistry.com/apache-ofbiz-mcp-server
+docker push myregistry.com/mcp4ofbiz-image
 ```
