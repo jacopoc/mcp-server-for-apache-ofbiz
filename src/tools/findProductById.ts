@@ -1,10 +1,9 @@
 import { z } from 'zod';
 import express from 'express';
 
-import { BACKEND_API_BASE, USER_AGENT } from '../server.js';
-import type { ToolDefinition } from '../types.js';
+import type { ServerConfig, ToolDefinition } from '../lib/config/types.js';
 
-export default function (): ToolDefinition {
+export default function (serverConfig: ServerConfig): ToolDefinition {
   return {
     name: 'findProductById',
     metadata: {
@@ -28,12 +27,12 @@ export default function (): ToolDefinition {
     handler: async ({ id }: { id: string }, request: express.Request) => {
       const idParam = { idToFind: id };
       const inParams = encodeURIComponent(JSON.stringify(idParam));
-      const backendUrl = `${BACKEND_API_BASE}/rest/services/findProductById?inParams=${inParams}`;
+      const backendUrl = `${serverConfig.BACKEND_API_BASE}/rest/services/findProductById?inParams=${inParams}`;
 
       const requestOptions: { method: string; headers: Record<string, string> } = {
         method: 'GET',
         headers: {
-          'User-Agent': USER_AGENT,
+          'User-Agent': serverConfig.BACKEND_USER_AGENT || '',
           Accept: 'application/json'
         }
       };
