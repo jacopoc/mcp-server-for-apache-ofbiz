@@ -19,7 +19,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
 
-import { loadTools } from './toolLoader.js';
+import { ToolDefinition } from './types.js';
 
 // Require config and tools paths as command-line arguments
 if (!process.argv[2] || !process.argv[3]) {
@@ -65,6 +65,41 @@ const TLS_KEY_PASSPHRASE = configData.TLS_KEY_PASSPHRASE;
 
 const enableAuth = MCP_SERVER_BASE_URL && AUTHZ_SERVER_BASE_URL;
 const enableHttps = TLS_KEY_PATH && TLS_CERT_PATH;
+
+async function loadTools(toolsFolderPath: string): Promise<ToolDefinition[]> {
+  const toolsDir = path.resolve(process.cwd(), toolsFolderPath);
+
+  if (!fs.existsSync(toolsDir)) {
+    console.warn(`Tools directory not found: ${toolsDir}`);
+    return [];
+  }
+
+  const tools: ToolDefinition[] = [];
+  const toolFiles = fs
+    .readdirSync(toolsDir)
+    .filter((file) => file.endsWith('.js') || file.endsWith('.ts'));
+
+  for (const file of toolFiles) {
+    try {
+      const toolPath = path.join(toolsDir, file);
+      const toolModule = await import(toolPath);
+
+      // Each tool file should export a default function that returns tool definitions
+      if (typeof toolModule.default === 'function') {
+        const toolDefs = await toolModule.default();
+        if (Array.isArray(toolDefs)) {
+          tools.push(...toolDefs);
+        } else {
+          tools.push(toolDefs);
+        }
+      }
+    } catch (error) {
+      console.error(`Error loading tool file ${file}:`, error);
+    }
+  }
+
+  return tools;
+}
 
 // Function to fetch JWKS URI from OpenID Connect metadata
 async function getJwksUri(issuer: string): Promise<string> {
