@@ -19,7 +19,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
 
-import { ToolDefinition } from './types.js';
+import type { ToolDefinition } from './types.js';
 
 // Require config and tools paths as command-line arguments
 if (!process.argv[2] || !process.argv[3]) {

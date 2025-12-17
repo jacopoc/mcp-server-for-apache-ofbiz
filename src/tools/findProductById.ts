@@ -2,7 +2,7 @@ import { z } from 'zod';
 import express from 'express';
 
 import { BACKEND_API_BASE, USER_AGENT } from '../server.js';
-import { ToolDefinition } from '../types.js';
+import type { ToolDefinition } from '../types.js';
 
 export default function (): ToolDefinition {
   return {
