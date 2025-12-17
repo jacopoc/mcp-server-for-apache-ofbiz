@@ -38,7 +38,7 @@ function getConfigData() {
   return JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 }
 
-export const TOOLS_FOLDER_PATH = path.resolve(process.argv[3]);
+const TOOLS_FOLDER_PATH = path.resolve(process.argv[3]);
 export const USER_AGENT = 'OFBiz-MCP-server';
 export const BACKEND_API_BASE = configData.BACKEND_API_BASE;
 const BACKEND_API_AUDIENCE = configData.BACKEND_API_AUDIENCE;
@@ -138,7 +138,7 @@ function getKey(header: JwtHeader, callback: SigningKeyCallback) {
   });
 }
 
-export interface ValidationResult {
+interface ValidationResult {
   valid: boolean;
   clientId?: string;
   scopes?: string[];
@@ -148,7 +148,7 @@ export interface ValidationResult {
   downstreamToken?: string | null;
 }
 
-export interface AuthenticatedRequest extends express.Request {
+interface AuthenticatedRequest extends express.Request {
   auth?: ValidationResult;
 }
 
