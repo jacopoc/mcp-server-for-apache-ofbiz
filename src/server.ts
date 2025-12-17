@@ -7,14 +7,15 @@ import fetch from 'node-fetch';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import cors from 'cors';
-import jwt, { JwtHeader, SigningKeyCallback } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+import type { JwtHeader, SigningKeyCallback } from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 import * as oidc_client from 'openid-client';
 import {
   mcpAuthMetadataRouter,
   getOAuthProtectedResourceMetadataUrl
 } from '@modelcontextprotocol/sdk/server/auth/router.js';
-import { OAuthMetadata } from '@modelcontextprotocol/sdk/shared/auth.js';
+import type { OAuthMetadata } from '@modelcontextprotocol/sdk/shared/auth.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
