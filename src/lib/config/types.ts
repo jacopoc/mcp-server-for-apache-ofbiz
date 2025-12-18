@@ -42,6 +42,7 @@ export interface RuntimeConfig {
 
 export interface DerivedConfig {
   enableAuth: boolean;
+  enableTokenExchange: boolean;
   enableHttps: boolean;
   rateLimitWindowMs: number;
   rateLimitMaxRequests: number;

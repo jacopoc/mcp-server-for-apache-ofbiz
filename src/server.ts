@@ -85,7 +85,10 @@ async function main() {
       dnsRebindingProtectionAllowedHosts: derivedConfig.dnsRebindingProtectionAllowedHosts,
       dnsRebindingProtectionAllowedOrigins: derivedConfig.dnsRebindingProtectionAllowedOrigins,
       enableAuth: derivedConfig.enableAuth,
-      performTokenExchange: derivedConfig.enableAuth ? performTokenExchange : undefined,
+      performTokenExchange:
+        derivedConfig.enableAuth && derivedConfig.enableTokenExchange
+          ? performTokenExchange
+          : undefined,
       tokenExchangeConfig: derivedConfig.enableAuth
         ? {
             authzServerBaseUrl: runtimeConfig.config.AUTHZ_SERVER_BASE_URL!,

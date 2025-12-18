@@ -28,10 +28,12 @@ export function createConfigReader(configPath: string): () => ServerConfig {
  */
 export function deriveConfig(config: ServerConfig): DerivedConfig {
   const enableAuth = !!(config.MCP_SERVER_BASE_URL && config.AUTHZ_SERVER_BASE_URL);
+  const enableTokenExchange = !!(config.MCP_SERVER_CLIENT_ID && config.MCP_SERVER_CLIENT_SECRET);
   const enableHttps = !!(config.TLS_KEY_PATH && config.TLS_CERT_PATH);
 
   return {
     enableAuth,
+    enableTokenExchange,
     enableHttps,
     rateLimitWindowMs: config.RATE_LIMIT_WINDOW_MS || 60000, // default 1 minute
     rateLimitMaxRequests: config.RATE_LIMIT_MAX_REQUESTS || 100, // default 100 requests
