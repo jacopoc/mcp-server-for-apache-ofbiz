@@ -9,7 +9,7 @@ export default [
     ignores: ['build/**', 'node_modules/**']
   },
   {
-    files: ['**/*.ts'],
+    files: ['src/**/*.ts'],
 
     languageOptions: {
       parser: tsParser,
@@ -55,6 +55,25 @@ export default [
       'prettier/prettier': 'error',
 
       // ---- Disable rules overridden by Prettier ----
+      ...prettier.rules
+    }
+  },
+  // Config files (no type checking required)
+  {
+    files: ['*.config.ts', '*.config.js'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        sourceType: 'module',
+        ecmaVersion: 'latest'
+        // No project reference - skip type checking for config files
+      }
+    },
+    plugins: {
+      prettier: eslintPluginPrettier
+    },
+    rules: {
+      'prettier/prettier': 'error',
       ...prettier.rules
     }
   }
