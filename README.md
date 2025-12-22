@@ -71,6 +71,7 @@ Server configuration is managed via `config/config.json`, which defines:
 - **`AUTHZ_SERVER_BASE_URL`** — the base URL of the Authorization (Authz) server (OAuth)
 - **`SCOPES_SUPPORTED`** — the scopes that the MCP client can request
 - **`BACKEND_API_BASE`** — the base URL for backend REST API calls
+- **`BACKEND_USER_AGENT`** — the user agent set in the header of downstream API calls
 - **`MCP_SERVER_CLIENT_ID`** — Client ID required for token exchange, as registered in Authz server
 - **`MCP_SERVER_CLIENT_SECRET`** — the secret associated with **`MCP_SERVER_CLIENT_ID`**
 - **`BACKEND_API_AUDIENCE`** — the OAuth audience paramenter for the backend system
@@ -94,10 +95,15 @@ If token exchange is not enabled, the access token for the OFBiz API can be set 
 ```text
 mcp-server-for-apache-ofbiz/
 ├── config/
-│   └── config.json               # Server configuration (backend API base, auth token, etc.)
+│   └── config.json               # Server configuration file
 ├── src/
 │   ├── server.ts                 # MCP server (Streamable HTTP transport)
-│   ├── toolLoader.ts             # Loader of tool definitions from "tools/"
+│   ├── lib/                      # Internal modules of the MCP server:
+│   |   ├── /auth/*               #   Authorization modules
+│   |   ├── /config/*             #   Configuration modules
+│   |   ├── /mcp/*                #   MCP specific modules
+│   |   ├── app.ts                #   Module for the Express app setup
+│   |   └── server-factory.ts     #   Module for the HTTP server setup
 │   └── tools/
 │       └── findProductById.ts    # Example tool calling an Apache OFBiz REST endpoint
 ├── update_token.sh               # Script to refresh backend auth token
