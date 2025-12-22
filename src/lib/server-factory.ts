@@ -17,6 +17,7 @@ export interface ServerFactoryConfig {
   enableHttps: boolean;
   tlsConfig?: TlsConfig;
   enableAuth: boolean;
+  enableTokenExchange: boolean;
 }
 
 /**
@@ -39,7 +40,7 @@ export function createServer(
 function createHttpServer(app: express.Application, config: ServerFactoryConfig): HTTPServer {
   const server = app.listen(config.port, () => {
     console.log(
-      `MCP stateful Streamable HTTP Server listening on port ${config.port} with ${config.enableAuth ? 'authentication' : 'no authentication'}.`
+      `MCP stateful Streamable HTTP Server listening on port ${config.port} with ${config.enableAuth ? 'authentication' : 'no authentication'} and ${config.enableTokenExchange ? 'token exchange' : 'no token exchange'}.`
     );
   });
   return server;
@@ -75,7 +76,7 @@ function createHttpsServer(app: express.Application, config: ServerFactoryConfig
     const server = https.createServer(serverOptions, app);
     server.listen(config.port, () => {
       console.log(
-        `MCP stateful Streamable HTTPS Server listening on port ${config.port} with ${config.enableAuth ? 'authentication' : 'no authentication'}.`
+        `MCP stateful Streamable HTTPS Server listening on port ${config.port} with ${config.enableAuth ? 'authentication' : 'no authentication'} and ${config.enableTokenExchange ? 'token exchange' : 'no token exchange'}.`
       );
     });
     return server;

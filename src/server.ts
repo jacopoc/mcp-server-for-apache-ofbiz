@@ -125,7 +125,8 @@ async function main() {
             passphrase: runtimeConfig.config.TLS_KEY_PASSPHRASE
           }
         : undefined,
-      enableAuth: derivedConfig.enableAuth
+      enableAuth: derivedConfig.enableAuth,
+      enableTokenExchange: derivedConfig.enableTokenExchange
     });
 
     // Handle graceful shutdown
