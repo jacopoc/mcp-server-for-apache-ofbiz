@@ -13,10 +13,6 @@ import { createMcpRequestHandler, createSessionRequestHandler } from './lib/mcp/
 import { createApp } from './lib/app.js';
 import { createServer } from './lib/server-factory.js';
 
-// Export constants that tools may depend on
-export const USER_AGENT = 'OFBiz-MCP-server';
-export let BACKEND_API_BASE: string;
-
 /**
  * Main entry point for the MCP server CLI
  */
@@ -35,9 +31,6 @@ async function main() {
     const runtimeConfig = loadRuntimeConfig(process.argv[2], process.argv[3]);
     validateConfig(runtimeConfig.config);
     const derivedConfig = deriveConfig(runtimeConfig.config);
-
-    // Set global constants for backward compatibility with tools
-    BACKEND_API_BASE = runtimeConfig.config.BACKEND_API_BASE;
 
     // Create config reader for dynamic config updates
     const getConfigData = createConfigReader(runtimeConfig.configPath);
