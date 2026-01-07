@@ -123,22 +123,30 @@ async function main() {
       configFolderPath: process.argv[2]
     });
 
-    // Handle graceful shutdown
-    process.on('SIGINT', () => {
-      console.log('\nShutting down gracefully...');
-      server.close(() => {
-        console.log('Server closed');
-        process.exit(0);
-      });
-    });
+    // Handle graceful shutdown with timeout
+    const SHUTDOWN_TIMEOUT_MS = 5000; // 5 seconds
 
-    process.on('SIGTERM', () => {
-      console.log('\nShutting down gracefully...');
+    const handleShutdown = (signal: string) => {
+      console.log(`\nReceived ${signal}, shutting down gracefully...`);
+
+      // Set a timeout to force shutdown if graceful shutdown takes too long
+      const forceShutdownTimer = setTimeout(() => {
+        console.error('Graceful shutdown timed out, forcing shutdown...');
+        process.exit(1);
+      }, SHUTDOWN_TIMEOUT_MS);
+
       server.close(() => {
         console.log('Server closed');
+        clearTimeout(forceShutdownTimer);
         process.exit(0);
       });
-    });
+
+      // Stop accepting new connections immediately
+      server.closeAllConnections?.();
+    };
+
+    process.on('SIGINT', () => handleShutdown('SIGINT'));
+    process.on('SIGTERM', () => handleShutdown('SIGTERM'));
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);
