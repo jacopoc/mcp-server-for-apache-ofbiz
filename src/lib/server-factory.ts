@@ -18,6 +18,7 @@ export interface ServerFactoryConfig {
   tlsConfig?: TlsConfig;
   enableAuth: boolean;
   enableTokenExchange: boolean;
+  configFolderPath: string;
 }
 
 /**
@@ -55,8 +56,8 @@ function createHttpsServer(app: express.Application, config: ServerFactoryConfig
   }
 
   try {
-    // Resolve key/cert relative to the project if paths provided in config are relative
-    const base = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
+    // Resolve key/cert relative to the config folder if paths provided in config are relative
+    const base = config.configFolderPath;
     const keyPath = path.isAbsolute(config.tlsConfig.keyPath)
       ? config.tlsConfig.keyPath
       : path.join(base, config.tlsConfig.keyPath);

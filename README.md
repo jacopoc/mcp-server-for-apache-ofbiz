@@ -59,8 +59,8 @@ The server:
 Server configuration is managed via `config/config.json`, which defines:
 
 - **`SERVER_PORT`** — the port on which the MCP server listens for client connections (required only for the remote server)
-- **`TLS_CERT_PATH`** — path to the file containing the certificate for TLS
-- **`TLS_KEY_PATH`** — path to the file containing the private key for TLS
+- **`TLS_CERT_PATH`** — path to the file containing the certificate for TLS, either absolute or relative to the configuration folder
+- **`TLS_KEY_PATH`** — path to the file containing the private key for TLS, either absolute or relative to the configuration folder
 - **`TLS_KEY_PASSPHRASE`** — (optional) passphrase for the **`TLS_KEY_PATH`** file
 - **`MCP_SERVER_CORS_ORIGINS`** — CORS origin allowed
 - **`MCP_SERVER_DNS_REBINDING_PROTECTION_ALLOWED_HOSTS`** - list of allowed values for request header `Host` for DNS rebinding protection

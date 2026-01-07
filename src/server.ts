@@ -119,7 +119,8 @@ async function main() {
           }
         : undefined,
       enableAuth: derivedConfig.enableAuth,
-      enableTokenExchange: derivedConfig.enableTokenExchange
+      enableTokenExchange: derivedConfig.enableTokenExchange,
+      configFolderPath: process.argv[2]
     });
 
     // Handle graceful shutdown
