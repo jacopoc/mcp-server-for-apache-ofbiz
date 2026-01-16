@@ -1,7 +1,7 @@
 {
   "name": "mcp_server_for_apache_ofbiz",
   "version": "1.0.0",
-  "description": "A Model Context Protocol (MCP) server for Apache OFBiz",
+  "description": "A Model Context Protocol (MCP) server platform for Apache OFBiz",
   "keywords": [
     "mcp",
     "modelcontextprotocol",
@@ -43,6 +43,8 @@
   },
   "scripts": {
     "clean": "rimraf ./build",
+    "clean:coverage": "rimraf ./coverage",
+    "clean:all": "npm run clean && npm run clean:coverage",
     "build": "npm run clean && tsc",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
