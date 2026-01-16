@@ -82,6 +82,8 @@ describe('createAuthMiddleware', () => {
         authorization: 'Bearer '
       };
 
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
       const middleware = createAuthMiddleware({
         validateAccessToken: mockValidateAccessToken,
         resourceMetadataUrl
@@ -91,6 +93,8 @@ describe('createAuthMiddleware', () => {
 
       // Token will be empty string, validation should handle it
       expect(mockValidateAccessToken).toHaveBeenCalledWith('');
+
+      consoleErrorSpy.mockRestore();
     });
   });
 
