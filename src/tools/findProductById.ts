@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import express from 'express';
+import type express from 'express';
 
 import type { ServerConfig, ToolDefinition } from '../lib/config/types.js';
 
