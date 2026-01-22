@@ -41,6 +41,12 @@
     "typescript": "^5.9.3",
     "vitest": "^4.0.17"
   },
+  "exports": {
+    "./config": {
+      "types": "./build/lib/config/index.d.ts",
+      "import": "./build/lib/config/index.js"
+    }
+  },
   "scripts": {
     "clean": "rimraf ./build",
     "clean:coverage": "rimraf ./coverage",
