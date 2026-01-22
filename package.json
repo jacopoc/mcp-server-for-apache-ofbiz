@@ -48,17 +48,17 @@
     }
   },
   "scripts": {
+    "build": "npm run clean && tsc",
     "clean": "rimraf ./build",
     "clean:coverage": "rimraf ./coverage",
     "clean:all": "npm run clean && npm run clean:coverage",
-    "build": "npm run clean && tsc",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier . --write",
     "test": "vitest run",
-    "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "test:watch": "vitest"
   },
   "bin": {
     "mcp_server_for_apache_ofbiz": "./build/server.js"
