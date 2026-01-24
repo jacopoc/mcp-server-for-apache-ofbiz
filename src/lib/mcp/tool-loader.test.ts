@@ -273,16 +273,18 @@ describe('loadTools', () => {
   });
 
   describe('behavior with mixed file types', () => {
-    it('should only attempt to load .js and .ts files from mixed directory', async () => {
+    it('should only attempt to load .js files from mixed directory', async () => {
       vi.spyOn(fs, 'existsSync').mockReturnValue(true);
       vi.spyOn(fs, 'readdirSync').mockReturnValue([
         'tool1.js',
         'README.md',
-        'tool2.ts',
+        'tool2.js',
         'package.json',
         'data.csv',
         'tool3.jsx', // Should not be loaded
-        'tool4.mjs' // Should not be loaded
+        'tool4.mjs', // Should not be loaded
+        'tool1.d.ts', // Should not be loaded
+        'tool1.d.ts.map' // Should not be loaded
       ] as unknown as ReturnType<typeof fs.readdirSync>);
 
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});

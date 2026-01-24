@@ -18,9 +18,7 @@ export async function loadTools(
   }
 
   const tools: ToolDefinition[] = [];
-  const toolFiles = fs
-    .readdirSync(toolsDir)
-    .filter((file) => file.endsWith('.js') || file.endsWith('.ts'));
+  const toolFiles = fs.readdirSync(toolsDir).filter((file) => file.endsWith('.js'));
 
   for (const file of toolFiles) {
     try {
