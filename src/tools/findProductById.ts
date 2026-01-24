@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import express from 'express';
+import fetch from 'node-fetch';
+import https from 'https';
 
 import type { ServerConfig, ToolDefinition } from '../lib/config/types.js';
 
@@ -26,23 +28,27 @@ export default function (serverConfig: ServerConfig): ToolDefinition {
     },
     handler: async ({ id }: { id: string }, request: express.Request) => {
       const idParam = { idToFind: id };
-      const inParams = encodeURIComponent(JSON.stringify(idParam));
-      const backendUrl = `${serverConfig.BACKEND_API_BASE}/rest/services/findProductById?inParams=${inParams}`;
 
-      const requestOptions: { method: string; headers: Record<string, string> } = {
-        method: 'GET',
+      const backendUrl = `${serverConfig.BACKEND_API_BASE}/api/service/findProductById`;
+
+      console.log("---backendUrl", backendUrl);
+      const httpsAgent = new https.Agent({
+        rejectUnauthorized: false
+      });
+
+      const requestOptions: any = {
+        method: 'POST',
         headers: {
           'User-Agent': serverConfig.BACKEND_USER_AGENT || '',
-          Accept: 'application/json'
-        }
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: (request as any).auth?.downstreamToken
+            ? `Bearer ${(request as any).auth.downstreamToken}`
+            : (serverConfig.BACKEND_ACCESS_TOKEN ? `Bearer ${serverConfig.BACKEND_ACCESS_TOKEN}` : '')
+        },
+        body: JSON.stringify(idParam),
+        agent: httpsAgent
       };
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((request as any).authInfo?.downstreamToken) {
-        requestOptions.headers['Authorization'] =
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          `Bearer ${(request as any).authInfo.downstreamToken}`;
-      }
 
       try {
         const response = await fetch(backendUrl, requestOptions);
@@ -50,16 +56,19 @@ export default function (serverConfig: ServerConfig): ToolDefinition {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const responseData = await response.json();
-        if (!responseData.data || !responseData.data.product) {
+        const responseData = await response.json() as any;
+        // Adjusted check to match OFBiz REST plugin response structure { product: { ... } }
+        if (!responseData || !responseData.product) {
           throw new Error('Product not found.');
         }
+        const product = responseData.product;
+
         const structuredContent = {
-          productId: responseData.data.product.productId || '',
-          productName: responseData.data.product.productName || '',
-          internalName: responseData.data.product.internalName || '',
-          description: responseData.data.product.description || '',
-          productTypeId: responseData.data.product.productTypeId || ''
+          productId: product.productId || '',
+          productName: product.productName || '',
+          internalName: product.internalName || '',
+          description: product.description || '',
+          productTypeId: product.productTypeId || ''
         };
         return {
           content: [
