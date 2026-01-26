@@ -1,22 +1,14 @@
 # MCP Server for Apache OFBiz®
 
-This project provides a prototype implementation of a Model Context Protocol (MCP) server for Apache OFBiz® that:
+This project provides an implementation of a Model Context Protocol (MCP) server that runs custom tools to invoke remote services thorugh API endpoints,  based on requests from an MCP client (usually hosted in a generative AI application such as Claude Desktop).
 
-- receives requests from an MCP client (usually hosted in a generative AI application such as Claude Desktop) and forwards those requests to a remote backend via RESTful API endpoints,
-- exposes a template tool that invokes the findProductById OFBiz endpoint.
+By leveraging the sample configuration and tool files contained in the `examples` folder, the MCP server can be easly configured, e.g., to point to specific backend systems and to use OAuth2.0 authorization flows, and new tools can be developed to address specific use cases.
 
-This project can be used as a platform to implement your own tools and enable generative AI applications to interact with any backend system that exposes REST API endpoints, such as [**Apache OFBiz**](https://ofbiz.apache.org) or [**Moqui**](https://www.moqui.org).
-
-The server implements an MCP server with Streamable HTTP transport.
-
-The project leverages the **Anthropic TypeScript SDK**, and requires:
-
-- Node.js
-- npm
+In short, this project can be used as a platform to implement your own tools and enable generative AI applications to interact with any backend system that exposes API endpoints, such as [**Apache OFBiz®**](https://ofbiz.apache.org) or [**Moqui**](https://www.moqui.org).
 
 This software is licensed under the Apache License, Version 2.0.
 
-Apache OFBiz® is a trademark of the [Apache Software Foundation](https://www.apache.org)
+Apache OFBiz® is a trademark of the [Apache Software Foundation](https://www.apache.org).
 
 ---
 
@@ -34,29 +26,28 @@ Apache OFBiz® is a trademark of the [Apache Software Foundation](https://www.ap
 
 ## Features
 
-The project includes an MCP server (`src/server.ts`) that communicates with the MCP client via MCP Streamable HTTP transport.
+The project leverages the **Anthropic TypeScript SDK**, and requires **Node.js**. The MCP server communicates with the MCP client via MCP Streamable HTTP transport.
 
-The server dynamically discovers MCP tools contained in the `tools` directory, whose path is specified as a command-line argument when the server is lauched.
+The server dynamically discovers custom tools contained in a directory, whose path is specified as a command-line argument when the server is lauched.
 
-Each tool is defined and implemented in its own file. For example, the sample tool `tools/findProductById.ts` invokes an endpoint in Apache OFBiz to retrieve product information for a given product ID. This works with an out-of-the-box (OOTB) OFBiz instance with the `rest-api` plugin installed.
-
-New tools can be published by simply including their definition files in the `tools` folder.
+The tools are defined and implemented in their own files. For example, the sample tool `examples/tools/findProductById.ts` invokes an endpoint in Apache OFBiz to retrieve product information for a given product ID. This works with an out-of-the-box (OOTB) OFBiz instance with the `rest-api` plugin installed.
 
 The server:
 
-- is compliant with the latest MCP specifications (2025-06-18)
-- supports authorization according to the MCP recommendations (OAuth Authorization Code Flow with support for Metadata discovery, Dynamic Client Registration, etc...)
+- is compliant with the latest MCP specifications (2025-11-25)
+- supports authorization according to the MCP recommendations (OAuth Authorization Code Flow with support for Metadata discovery, dynamically registered clients, etc...)
 - supports the token exchange OAuth flow in order to obtain a valid token for the backend system
 - performs token validation with configurable scopes and audience verification
-- supports TLS connections (https)
+- supports TLS connections (https) for secure, encrypted communications over public networks
 - provides rate limiting features to protect the MCP server and the backend server from denial of service attacks
-- allows CORS restrictions
+- allows CORS restriction to enable secure interactions with trusted front-end applications
+- supports hosts and origins restrictions for DNS rebinding protection, useful when the server is deployed as a local application
 
 ---
 
 ## Configuration
 
-Server configuration is managed via `config/config.json`, which defines:
+Server configuration is managed via the `config.json` file contained in a configuration directory, whose path is specified as a command-line argument when the server is lauched:
 
 - **`SERVER_PORT`** — the port on which the MCP server listens for client connections (required only for the remote server)
 - **`TLS_CERT_PATH`** — path to the file containing the certificate for TLS, either absolute or relative to the configuration folder
@@ -86,7 +77,7 @@ If either **`MCP_SERVER_BASE_URL`** or **`AUTHZ_SERVER_BASE_URL`** are not set, 
 
 If authorization is enabled, but either **`MCP_SERVER_CLIENT_ID`** or **`MCP_SERVER_CLIENT_SECRET`** are not set, token exchange is disabled.
 
-If token exchange is not enabled, the access token for the OFBiz API can be set in **`BACKEND_AUTH_TOKEN`**.
+If token exchange is not enabled, the access token for the back-end APIs can be set in **`BACKEND_AUTH_TOKEN`**.
 
 ---
 
@@ -94,19 +85,23 @@ If token exchange is not enabled, the access token for the OFBiz API can be set 
 
 ```text
 mcp-server-for-apache-ofbiz/
-├── config/
-│   └── config.json               # Server configuration file
+├── examples/
+│   ├── config/                   
+│   |   └── config.json           # Sample server configuration file
+│   │── tools/
+│   │   └── findProductById.ts    # Sample tool calling an Apache OFBiz endpoint
+│   ├── update_token.sh           # Script to get a backend auth token for Apache OFBiz APIs
+│   ├── package.json              
+│   ├── tsconfig.json             
+│   └── README.md
 ├── src/
-│   ├── server.ts                 # MCP server (Streamable HTTP transport)
 │   ├── lib/                      # Internal modules of the MCP server:
-│   |   ├── /auth/*               #   Authorization modules
-│   |   ├── /config/*             #   Configuration modules
-│   |   ├── /mcp/*                #   MCP specific modules
-│   |   ├── app.ts                #   Module for the Express app setup
-│   |   └── server-factory.ts     #   Module for the HTTP server setup
-│   └── tools/
-│       └── findProductById.ts    # Example tool calling an Apache OFBiz REST endpoint
-├── update_token.sh               # Script to refresh backend auth token
+│   |   ├── /auth/*               # Authorization modules
+│   |   ├── /config/*             # Configuration modules
+│   |   ├── /mcp/*                # MCP specific modules
+│   |   ├── app.ts                # Module for the Express app setup
+│   |   └── server-factory.ts     # Module for the HTTP server setup
+│   └── server.ts                 # MCP server 
 ├── package.json
 ├── tsconfig.json
 └── README.md                     # This readme file
@@ -122,20 +117,28 @@ npm run build
 
 ## Test the MCP Server
 
-With the configuration file provided (`./config/config.json`) the MCP server operates over a plain HTTP connection at `http://localhost:3000/mcp`, with authorization and token exchange disabled, and invokes the APIs of one of the Apache OFBiz demo instances.
+With the configuration file provided (`./examples/config/config.json`) the MCP server operates over a plain HTTP connection, on port 3000, with authorization and token exchange disabled, and invokes the APIs of one of the Apache OFBiz demo instances.
 
-The access token required for the OFBiz APIs can be generated and set in **`BACKEND_AUTH_TOKEN`** by running the utility script
+The access token required for the OFBiz APIs can be generated and set in **`BACKEND_AUTH_TOKEN`** by running from the `examples` folder the utility script 
 
 `update_token.sh <user> <password>`
 
 with, e.g., `admin` and `ofbiz`, as user and password, respectively.
 This script retrieves a JWT for an OOTB OFBiz instance from `https://demo-stable.ofbiz.apache.org/rest/auth/token`, as specified in **`BACKEND_API_AUTH`**.
 
-Start the server specifying the paths to the configuration and tools folders:
+In order to compile the sample tool, go to the `examples` directory and run
 
 ```sh
-node ./build/server.js ./config ./build/tools
+npm install
+npm run build
 ```
+
+Start the server from the main folder, specifying the paths to the examples configuration and tools folders:
+
+```sh
+node ./build/server.js ./examples/config ./examples/build
+```
+The server is reachable at `http://localhost:3000/mcp`.
 
 You can test the MCP server with the free version of **Claude Desktop**.
 
@@ -198,7 +201,7 @@ docker build --platform=linux/amd64 -t mcp4ofbiz-image .
 After building the image, create a container, e.g., named `mcp4ofbiz-container`
 
 ```sh
-docker create --name mcp4ofbiz-container -p 3000:3000 -v ${PWD}/config:/usr/src/app/config -v ${PWD}/build/tools:/usr/src/app/build/tools mcp4ofbiz-image ./config ./build/tools
+docker create --name mcp4ofbiz-container -p 3000:3000 -v ${PWD}/examples/config:/usr/src/app/config -v ${PWD}/examples/build:/usr/src/app/build/tools mcp4ofbiz-image ./examples/config ./examples/build
 ```
 
 and run it
