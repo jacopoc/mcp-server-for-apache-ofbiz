@@ -1,4 +1,6 @@
 import { spawn } from 'child_process';
+import * as fs from 'fs/promises';
+import * as os from 'os';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -49,6 +51,38 @@ function runServerProcess(
   });
 }
 
+/**
+ * Creates temporary directories for testing with a minimal valid config
+ * Returns paths and a cleanup function
+ */
+async function createTempTestDirs(): Promise<{
+  configDir: string;
+  toolsDir: string;
+  cleanup: () => Promise<void>;
+}> {
+  const configDir = await fs.mkdtemp(path.join(os.tmpdir(), 'mcp-test-config-'));
+  const toolsDir = await fs.mkdtemp(path.join(os.tmpdir(), 'mcp-test-tools-'));
+
+  const minimalConfig = {
+    SERVER_PORT: 49152 + Math.floor(Math.random() * 1000),
+    MCP_SERVER_CORS_ORIGINS: '*',
+    RATE_LIMIT_WINDOW_MS: 60000,
+    RATE_LIMIT_MAX_REQUESTS: 100,
+    SCOPES_SUPPORTED: ['mcp:call-tools'],
+    BACKEND_API_BASE: 'https://example.com',
+    BACKEND_USER_AGENT: 'test-agent'
+  };
+
+  await fs.writeFile(path.join(configDir, 'config.json'), JSON.stringify(minimalConfig, null, 2));
+
+  const cleanup = async () => {
+    await fs.rm(configDir, { recursive: true, force: true });
+    await fs.rm(toolsDir, { recursive: true, force: true });
+  };
+
+  return { configDir, toolsDir, cleanup };
+}
+
 describe('server CLI', () => {
   describe('command-line argument validation', () => {
     it('should exit with error when no arguments are provided', async () => {
@@ -78,13 +112,17 @@ describe('server CLI', () => {
     });
 
     it('should start server even when tools folder does not exist', async () => {
-      const projectRoot = path.join(__dirname, '..');
-      const configPath = path.join(projectRoot, 'config');
-      const result = await runServerProcess([configPath, '/nonexistent/tools'], 500);
+      const { configDir, cleanup } = await createTempTestDirs();
 
-      // Server starts successfully but logs a warning about missing tools directory
-      // Exit code is 0 because we send SIGTERM after timeout
-      expect(result.exitCode).toBe(0);
+      try {
+        const result = await runServerProcess([configDir, '/nonexistent/tools'], 500);
+
+        // Server starts successfully but logs a warning about missing tools directory
+        // Exit code is 0 because we send SIGTERM after timeout
+        expect(result.exitCode).toBe(0);
+      } finally {
+        await cleanup();
+      }
     });
   });
 
@@ -100,66 +138,85 @@ describe('server CLI', () => {
   describe('graceful shutdown', () => {
     it('should handle SIGTERM signal gracefully', async () => {
       const projectRoot = path.join(__dirname, '..');
-      const configPath = path.join(projectRoot, 'config');
-      const toolsPath = path.join(projectRoot, 'tools');
+      const { configDir, toolsDir, cleanup } = await createTempTestDirs();
 
-      // Start server and immediately send SIGTERM
-      const serverPath = path.join(projectRoot, 'build', 'server.js');
-      const child = spawn('node', [serverPath, configPath, toolsPath], {
-        env: { ...process.env, NODE_ENV: 'test' }
-      });
+      let child: ReturnType<typeof spawn> | null = null;
 
-      let stdout = '';
+      try {
+        const serverPath = path.join(projectRoot, 'build', 'server.js');
+        child = spawn('node', [serverPath, configDir, toolsDir], {
+          env: { ...process.env, NODE_ENV: 'test' },
+          stdio: ['pipe', 'pipe', 'pipe']
+        });
 
-      child.stdout.on('data', (data) => {
-        stdout += data.toString();
-      });
+        let stdout = '';
 
-      // Wait a bit for server to start, then kill it
-      await new Promise((resolve) => setTimeout(resolve, 500));
+        child.stdout!.on('data', (data) => {
+          stdout += data.toString();
+        });
 
-      const exitPromise = new Promise<number | null>((resolve) => {
-        child.on('exit', (code) => resolve(code));
-      });
+        // Wait a bit for server to start, then kill it
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
-      child.kill('SIGTERM');
+        const exitPromise = new Promise<number | null>((resolve) => {
+          child!.on('exit', (code) => resolve(code));
+        });
 
-      const exitCode = await exitPromise;
+        child.kill('SIGTERM');
 
-      // Should exit gracefully (not force killed)
-      expect(exitCode).toBe(0);
-      expect(stdout).toContain('shutting down gracefully');
+        const exitCode = await exitPromise;
+
+        // Should exit gracefully (not force killed)
+        expect(exitCode).toBe(0);
+        expect(stdout).toContain('shutting down gracefully');
+      } finally {
+        // Ensure child process is killed if still running
+        if (child && !child.killed) {
+          child.kill('SIGKILL');
+        }
+        await cleanup();
+      }
     }, 10000);
 
     it('should handle SIGINT signal gracefully', async () => {
       const projectRoot = path.join(__dirname, '..');
-      const configPath = path.join(projectRoot, 'config');
-      const toolsPath = path.join(projectRoot, 'tools');
+      const { configDir, toolsDir, cleanup } = await createTempTestDirs();
 
-      const serverPath = path.join(projectRoot, 'build', 'server.js');
-      const child = spawn('node', [serverPath, configPath, toolsPath], {
-        env: { ...process.env, NODE_ENV: 'test' }
-      });
+      let child: ReturnType<typeof spawn> | null = null;
 
-      let stdout = '';
+      try {
+        const serverPath = path.join(projectRoot, 'build', 'server.js');
+        child = spawn('node', [serverPath, configDir, toolsDir], {
+          env: { ...process.env, NODE_ENV: 'test' },
+          stdio: ['pipe', 'pipe', 'pipe']
+        });
 
-      child.stdout.on('data', (data) => {
-        stdout += data.toString();
-      });
+        let stdout = '';
 
-      // Wait for server to start
-      await new Promise((resolve) => setTimeout(resolve, 500));
+        child.stdout!.on('data', (data) => {
+          stdout += data.toString();
+        });
 
-      const exitPromise = new Promise<number | null>((resolve) => {
-        child.on('exit', (code) => resolve(code));
-      });
+        // Wait for server to start
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
-      child.kill('SIGINT');
+        const exitPromise = new Promise<number | null>((resolve) => {
+          child!.on('exit', (code) => resolve(code));
+        });
 
-      const exitCode = await exitPromise;
+        child.kill('SIGINT');
 
-      expect(exitCode).toBe(0);
-      expect(stdout).toContain('shutting down gracefully');
+        const exitCode = await exitPromise;
+
+        expect(exitCode).toBe(0);
+        expect(stdout).toContain('shutting down gracefully');
+      } finally {
+        // Ensure child process is killed if still running
+        if (child && !child.killed) {
+          child.kill('SIGKILL');
+        }
+        await cleanup();
+      }
     }, 10000);
   });
 

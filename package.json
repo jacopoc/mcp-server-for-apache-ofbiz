@@ -1,5 +1,5 @@
 {
-  "name": "mcp_server_for_apache_ofbiz",
+  "name": "mcp-server-for-apache-ofbiz",
   "version": "1.0.0",
   "description": "A Model Context Protocol (MCP) server platform for Apache OFBiz",
   "keywords": [
@@ -60,8 +60,5 @@
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "test:watch": "vitest"
-  },
-  "bin": {
-    "mcp_server_for_apache_ofbiz": "./build/server.js"
   }
 }

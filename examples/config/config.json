@@ -15,8 +15,8 @@
   "BACKEND_USER_AGENT": "OFBiz-MCP-server",
   "MCP_SERVER_CLIENT_ID": "",
   "MCP_SERVER_CLIENT_SECRET": "",
-  "BACKEND_API_AUDIENCE": "https://demo-stable.ofbiz.apache.org",
-  "BACKEND_API_RESOURCE": "https://demo-stable.ofbiz.apache.org",
+  "BACKEND_API_AUDIENCE": "",
+  "BACKEND_API_RESOURCE": "",
   "TOKEN_EXCHANGE_SCOPE": ["ofbiz:use-api"],
   "BACKEND_API_AUTH": "https://demo-stable.ofbiz.apache.org/rest/auth/token",
   "BACKEND_ACCESS_TOKEN": ""

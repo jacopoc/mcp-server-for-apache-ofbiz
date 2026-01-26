@@ -1,0 +1,23 @@
+{
+  "name": "examples",
+  "version": "1.0.0",
+  "description": "Examples of configuration files and tools for the MCP server platform",
+  "license": "Apache-2.0",
+  "author": "",
+  "type": "module",
+  "files": [
+    "build"
+  ],
+  "dependencies": {
+    "mcp-server-for-apache-ofbiz": "file:..",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "clean": "rm -r ./build",
+    "build": "tsc"
+  }
+}

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type express from 'express';
 
-import type { ServerConfig, ToolDefinition } from '../lib/config/types.js';
+import type { ServerConfig, ToolDefinition } from 'mcp-server-for-apache-ofbiz/config';
 
 export default function (serverConfig: ServerConfig): ToolDefinition {
   return {

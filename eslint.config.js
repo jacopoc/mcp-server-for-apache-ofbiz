@@ -6,7 +6,7 @@ import importPlugin from 'eslint-plugin-import';
 
 export default [
   {
-    ignores: ['build/**', 'node_modules/**', 'coverage/**']
+    ignores: ['build/**', 'node_modules/**', 'coverage/**', 'examples/**']
   },
   {
     files: ['src/**/*.ts'],
