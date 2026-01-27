@@ -2,6 +2,8 @@
 
 This project provides an implementation of a Model Context Protocol (MCP) server that runs custom tools to invoke remote services thorugh API endpoints,  based on requests from an MCP client (usually hosted in a generative AI application such as Claude Desktop).
 
+The project is implemented with the **Anthropic TypeScript SDK**, and requires **Node.js** as runtime environment.
+
 By leveraging the sample configuration and tool files contained in the `examples` folder, the MCP server can be easly configured, e.g., to point to specific backend systems and to use OAuth2.0 authorization flows, and new tools can be developed to address specific use cases.
 
 In short, this project can be used as a platform to implement your own tools and enable generative AI applications to interact with any backend system that exposes API endpoints, such as [**Apache OFBiz®**](https://ofbiz.apache.org) or [**Moqui**](https://www.moqui.org).
@@ -14,26 +16,46 @@ Apache OFBiz® is a trademark of the [Apache Software Foundation](https://www.ap
 
 ## Table of Contents
 
+1. [Quick-start guide](#quick-start-guide)
 1. [Features](#features)
-2. [Configuration](#configuration)
-3. [Project Structure](#project-structure)
-4. [Build the Project](#build-the-project)
-5. [Test the Remote MCP Server](#test-the-mcp-server)
-6. [Inspect the MCP servers](#inspect-the-mcp-servers)
-7. [Containerization with Docker](#containerization-with-docker)
+1. [Configuration](#configuration)
+1. [Project Structure](#project-structure)
+1. [Build the Project](#build-the-project)
+1. [Test the Remote MCP Server](#test-the-mcp-server)
+1. [Inspect the MCP servers](#inspect-the-mcp-servers)
+1. [Containerization with Docker](#containerization-with-docker)
 
 ---
 
+## Quick-start guide
+
+```sh
+> git clone https://github.com/jacopoc/mcp-server-for-apache-ofbiz.git mcp-server
+> cd mcp-server
+mcp-server> npm install
+mcp-server> npm run build
+mcp-server> cd examples
+mcp-server/examples> npm install
+mcp-server/examples> npm run build
+mcp-server/examples> ./update_token.sh admin ofbiz
+mcp-server/examples> cd ..
+mcp-server> node build/server.js ./examples/config ./examples/build
+```
+From another shell you can start the MCP Inspector:
+```sh
+> npx @modelcontextprotocol/inspector
+```
+This command will open a browser window to the Inspector application: set `Transport Type` to `Streamable HTTP` and `URL` to `http://localhost:3000/mcp` and hit the `Connect` button. After that, you will be connected to the MCP server and could execute its tool, that fetches data from one of the public demo instances of Apache OFBiz.
+
 ## Features
 
-The project leverages the **Anthropic TypeScript SDK**, and requires **Node.js**. The MCP server communicates with the MCP client via MCP Streamable HTTP transport.
+The MCP server communicates with the MCP client via MCP Streamable HTTP transport.
 
 The server dynamically discovers custom tools contained in a directory, whose path is specified as a command-line argument when the server is lauched.
 
 The tools are defined and implemented in their own files. For example, the sample tool `examples/tools/findProductById.ts` invokes an endpoint in Apache OFBiz to retrieve product information for a given product ID. This works with an out-of-the-box (OOTB) OFBiz instance with the `rest-api` plugin installed.
 
 The server:
-
 - is compliant with the latest MCP specifications (2025-11-25)
 - supports authorization according to the MCP recommendations (OAuth Authorization Code Flow with support for Metadata discovery, dynamically registered clients, etc...)
 - supports the token exchange OAuth flow in order to obtain a valid token for the backend system
