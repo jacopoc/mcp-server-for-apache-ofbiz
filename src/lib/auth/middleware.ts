@@ -31,7 +31,7 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
           jsonrpc: '2.0',
           error: {
             code: -32001,
-            message: 'Authorization required'
+            message: 'Unauthorized'
           },
           id: null
         });
