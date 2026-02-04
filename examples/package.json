@@ -9,10 +9,10 @@
     "build"
   ],
   "dependencies": {
-    "mcp-server-for-apache-ofbiz": "file:..",
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "mcp-server-for-apache-ofbiz": "file:..",
     "@types/express": "^5.0.6",
     "typescript": "^5.9.3"
   },
