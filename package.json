@@ -14,6 +14,9 @@
   "files": [
     "build"
   ],
+  "bin": {
+    "mcp-server-for-apache-ofbiz": "build/server.js"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.2",
     "express-rate-limit": "^8.2.1",
@@ -48,7 +51,7 @@
     }
   },
   "scripts": {
-    "build": "npm run clean && tsc",
+    "build": "npm run clean && tsc && node -e \"require('fs').chmodSync('build/server.js', 0o755)\"",
     "clean": "rimraf ./build",
     "clean:coverage": "rimraf ./coverage",
     "clean:all": "npm run clean && npm run clean:coverage",
