@@ -4,13 +4,13 @@
     "module": "Node16",
     "moduleResolution": "Node16",
     "outDir": "./build",
-    "rootDir": "./tools",
+    "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "verbatimModuleSyntax": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["tools/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules"]
 }
