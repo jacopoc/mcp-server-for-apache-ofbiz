@@ -58,6 +58,6 @@ export function loadRuntimeConfig(
   return {
     config,
     configPath,
-    toolsFolderPath: path.resolve(toolsFolderPath)
+    toolsFolderPath: path.resolve(toolsFolderPath, 'build')
   };
 }
