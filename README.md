@@ -33,13 +33,13 @@ Apache OFBiz® is a trademark of the [Apache Software Foundation](https://www.ap
 > git clone https://github.com/jacopoc/mcp-server-for-apache-ofbiz.git mcp-server
 > cd mcp-server
 mcp-server> npm install
-mcp-server> npm run build
-mcp-server> cd examples
-mcp-server/examples> npm install
-mcp-server/examples> npm run build
+mcp-server> cd examples/tools
+mcp-server/examples/tools> npm install
+mcp-server/examples/tools> npm run build
+mcp-server/examples/tools> cd ..
 mcp-server/examples> ./update_token.sh admin ofbiz
 mcp-server/examples> cd ..
-mcp-server> node build/server.js ./examples/config ./examples/build
+mcp-server> node build/server.js ./examples/config ./examples/tools
 ```
 From another shell you can start the MCP Inspector:
 ```sh
@@ -111,22 +111,23 @@ mcp-server-for-apache-ofbiz/
 │   ├── config/                   
 │   |   └── config.json           # Sample server configuration file
 │   │── tools/
-│   │   └── findProductById.ts    # Sample tool calling an Apache OFBiz endpoint
+│   |   ├── src/               # Authorization modules
+│   │   │   └── findProductById.ts    # Sample tool calling an Apache OFBiz endpoint
+│   │   ├── package.json              
+│   │   └── tsconfig.json             
 │   ├── update_token.sh           # Script to get a backend auth token for Apache OFBiz APIs
-│   ├── package.json              
-│   ├── tsconfig.json             
 │   └── README.md
 ├── src/
 │   ├── lib/                      # Internal modules of the MCP server:
-│   |   ├── /auth/*               # Authorization modules
-│   |   ├── /config/*             # Configuration modules
-│   |   ├── /mcp/*                # MCP specific modules
+│   |   ├── auth/*               # Authorization modules
+│   |   ├── config/*             # Configuration modules
+│   |   ├── mcp/*                # MCP specific modules
 │   |   ├── app.ts                # Module for the Express app setup
 │   |   └── server-factory.ts     # Module for the HTTP server setup
 │   └── server.ts                 # MCP server 
 ├── package.json
 ├── tsconfig.json
-└── README.md                     # This readme file
+├── README.md                     # This readme file
 └── LICENSE                       # Apache License, Version 2.0
 ```
 
@@ -148,7 +149,7 @@ The access token required for the OFBiz APIs can be generated and set in **`BACK
 with, e.g., `admin` and `ofbiz`, as user and password, respectively.
 This script retrieves a JWT for an OOTB OFBiz instance from `https://demo-stable.ofbiz.apache.org/rest/auth/token`, as specified in **`BACKEND_API_AUTH`**.
 
-In order to compile the sample tool, go to the `examples` directory and run
+In order to compile the sample tool, go to the `examples/tools` directory and run
 
 ```sh
 npm install
@@ -158,7 +159,7 @@ npm run build
 Start the server from the main folder, specifying the paths to the examples configuration and tools folders:
 
 ```sh
-node ./build/server.js ./examples/config ./examples/build
+node ./build/server.js ./examples/config ./examples/tools
 ```
 The server is reachable at `http://localhost:3000/mcp`.
 
@@ -208,7 +209,7 @@ This will open a browser window ready to test your MCP servers.
 
 The following instructions describe how to containerize the MCP server using Docker and the Dockerfile provided.
 
-First, build a Docker image named, e.g., `mcp4ofbiz-image`:
+First, build a Docker image named, e.g., `mcp4ofbiz-image`, by running the following command from the project's home directory:
 
 ```sh
 docker build -t mcp4ofbiz-image .
@@ -223,7 +224,7 @@ docker build --platform=linux/amd64 -t mcp4ofbiz-image .
 After building the image, create a container, e.g., named `mcp4ofbiz-container`
 
 ```sh
-docker create --name mcp4ofbiz-container -p 3000:3000 -v ${PWD}/examples/config:/usr/src/app/config -v ${PWD}/examples/build:/usr/src/app/build/tools mcp4ofbiz-image ./examples/config ./examples/build
+docker create --name mcp4ofbiz-container -p 3000:3000 -v ./examples/config:/config -v ./examples/tools:/tools mcp4ofbiz-image
 ```
 
 and run it
