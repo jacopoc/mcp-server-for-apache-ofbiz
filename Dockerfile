@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG NODE_VERSION=22.13.1
+ARG NODE_VERSION=22.22.0
 
 ################################################################################
 # Use node image for base image for all stages.
@@ -10,16 +10,24 @@ FROM node:${NODE_VERSION}-alpine AS base
 WORKDIR /usr/src/app
 
 ################################################################################
+# Generate package-lock.json if it is not already present in the build context.
+# This allows the subsequent stages to use npm ci for faster, deterministic installs.
+FROM base AS lockfile
+
+COPY package.json .
+COPY package-lock.jso[n] .
+RUN --mount=type=cache,target=/root/.npm \
+    [ -f package-lock.json ] || npm install --package-lock-only
+
+################################################################################
 # Create a stage for installing production dependencies.
 FROM base AS deps
 
 # Download dependencies as a separate step to take advantage of Docker's caching.
 # Leverage a cache mount to /root/.npm to speed up subsequent builds.
-# Leverage bind mounts to package.json and package-lock.json to avoid having to copy them
-# into this layer.
-RUN --mount=type=bind,source=package.json,target=package.json \
-    --mount=type=bind,source=package-lock.json,target=package-lock.json \
-    --mount=type=cache,target=/root/.npm \
+COPY package.json .
+COPY --from=lockfile /usr/src/app/package-lock.json .
+RUN --mount=type=cache,target=/root/.npm \
     npm ci --omit=dev
 
 ################################################################################
@@ -28,13 +36,14 @@ FROM deps AS build
 
 # Download additional development dependencies before building, as this project requires
 # "devDependencies" to be installed to build.
-RUN --mount=type=bind,source=package.json,target=package.json \
-    --mount=type=bind,source=package-lock.json,target=package-lock.json \
-    --mount=type=cache,target=/root/.npm \
-    npm ci
+COPY package.json .
+COPY --from=lockfile /usr/src/app/package-lock.json .
+RUN --mount=type=cache,target=/root/.npm \
+    SKIP_PREPARE=1 npm ci
 
 # Copy the rest of the source files into the image.
 COPY . .
+
 # Run the build script.
 RUN npm run build
 
@@ -60,9 +69,9 @@ COPY --from=build /usr/src/app/build ./build
 # Expose the port that the application listens on.
 EXPOSE 3000
 
-# Define environment variables for the paths to the configuration and tool folders.
-ENV PATH_TO_CONFIG_FOLDER=''
-ENV PATH_TO_TOOLS_FOLDER=''
-
 # Run the application.
+# The two mandatory arguments are the paths to the config and tools directories,
+# which are expected to be mounted as volumes at runtime.
 ENTRYPOINT ["node", "build/server.js"]
+CMD ["/config", "/tools"]
+

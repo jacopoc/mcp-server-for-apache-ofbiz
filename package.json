@@ -58,7 +58,7 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier . --write",
-    "prepare": "npm run build",
+    "prepare": "node -e \"if(process.env.SKIP_PREPARE)process.exit(0);try{require.resolve('typescript')}catch{process.exit(0)};require('child_process').execSync('npm run build',{stdio:'inherit'})\"",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
