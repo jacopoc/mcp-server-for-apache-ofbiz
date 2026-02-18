@@ -53,7 +53,7 @@ The MCP server communicates with the MCP client via MCP Streamable HTTP transpor
 
 The server dynamically discovers custom tools contained in a directory, whose path is specified as a command-line argument when the server is lauched.
 
-The tools are defined and implemented in their own files. For example, the sample tool `examples/tools/findProductById.ts` invokes an endpoint in Apache OFBiz to retrieve product information for a given product ID. This works with an out-of-the-box (OOTB) OFBiz instance with the `rest-api` plugin installed.
+The tools are defined and implemented in their own files. For example, the sample tool `examples/tools/src/findProductById.ts` invokes an endpoint in Apache OFBiz to retrieve product information for a given product ID. This works with an out-of-the-box (OOTB) OFBiz instance with the `rest-api` plugin installed.
 
 The server:
 - is compliant with the latest MCP specifications (2025-11-25)
