@@ -62,7 +62,7 @@ export function createMcpRequestHandler(config: McpRequestHandlerConfig) {
       };
       const server = new McpServer({
         name: 'MCP Server for Apache OFBiz',
-        version: '1.3.0'
+        version: '1.8.0'
       });
 
       // Load and register tools from external files
