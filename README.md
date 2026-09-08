@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/jacopoc-mcp-server-for-apache-ofbiz-badge.png)](https://mseep.ai/app/jacopoc-mcp-server-for-apache-ofbiz)
+
 # MCP Server for Apache OFBiz®
 
 This project provides an implementation of a Model Context Protocol (MCP) server that runs custom tools to invoke remote services through API endpoints,  based on requests from an MCP client (usually hosted in a generative AI application such as Claude Desktop).
