@@ -10,14 +10,17 @@
   "RATE_LIMIT_MAX_REQUESTS": 100,
   "MCP_SERVER_BASE_URL": "",
   "AUTHZ_SERVER_BASE_URL": "",
-  "SCOPES_SUPPORTED": ["mcp:call-tools"],
+  "SCOPES_SUPPORTED": [
+    "mcp:call-tools"
+  ],
   "BACKEND_API_BASE": "https://demo-stable.ofbiz.apache.org",
   "BACKEND_USER_AGENT": "OFBiz-MCP-server",
   "MCP_SERVER_CLIENT_ID": "",
   "MCP_SERVER_CLIENT_SECRET": "",
   "BACKEND_API_AUDIENCE": "",
   "BACKEND_API_RESOURCE": "",
-  "TOKEN_EXCHANGE_SCOPE": ["ofbiz:use-api"],
-  "BACKEND_API_AUTH": "https://demo-stable.ofbiz.apache.org/rest/auth/token",
+  "TOKEN_EXCHANGE_SCOPE": [
+    "ofbiz:use-api"
+  ],
   "BACKEND_ACCESS_TOKEN": ""
 }

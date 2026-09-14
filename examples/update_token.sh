@@ -7,12 +7,8 @@ if [ ! -f "$CONFIG_FILE" ]; then
   exit 1
 fi
 
-# Read BACKEND_API_AUTH using jq
-BACKEND_API_AUTH=$(jq -r '.BACKEND_API_AUTH // empty' "$CONFIG_FILE")
-if [ -z "$BACKEND_API_AUTH" ]; then
-  echo "❌ BACKEND_API_AUTH is missing in $CONFIG_FILE"
-  exit 1
-fi
+# OFBiz token endpoint
+BACKEND_API_AUTH="https://demo-stable.ofbiz.apache.org/rest/auth/token"
 
 # Allow USER and PASSWORD as positional args or environment variables
 # Usage: update_token.sh [USER] [PASSWORD]
