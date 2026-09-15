@@ -1,17 +1,17 @@
 #!/bin/bash
+# Usage: update_token.sh [USER] [PASSWORD]
 
-# Step 0: Read BACKEND_API_AUTH from config
 CONFIG_FILE="./config/config.json"
 if [ ! -f "$CONFIG_FILE" ]; then
   echo "❌ Config file not found: $CONFIG_FILE"
   exit 1
 fi
 
-# OFBiz token endpoint
+# OFBiz token issuance URL
 BACKEND_API_AUTH="https://demo-stable.ofbiz.apache.org/rest/auth/token"
 
 # Allow USER and PASSWORD as positional args or environment variables
-# Usage: update_token.sh [USER] [PASSWORD]
+
 USER_ARG="$1"
 PASS_ARG="$2"
 
@@ -21,7 +21,7 @@ if [ -n "$USER_ARG" ] && [ -n "$PASS_ARG" ]; then
 fi
 
 if [ -z "$AUTH_USER" ] || [ -z "$AUTH_PASS" ]; then
-  echo "❌ Missing USER and PASSWORD. Provide as arguments or set BACKEND_AUTH_USER and BACKEND_AUTH_PASS env vars."
+  echo "❌ Missing USER and PASSWORD. Provide as arguments or set AUTH_USER and AUTH_PASS env vars."
   exit 1
 fi
 
@@ -33,10 +33,10 @@ CMD=(curl -s -k -X POST "$BACKEND_API_AUTH" \
   -H "accept: application/json" \
   -H "Authorization: Basic $AUTH_B64")
 
-# Step 1: Execute curl command and capture response
+# Execute curl command and capture response
 RESPONSE=$("${CMD[@]}")
 
-# Step 2: Extract access_token from JSON response
+# Extract access_token from JSON response
 ACCESS_TOKEN=$(echo "$RESPONSE" | jq -r '.data.access_token')
 
 if [ -z "$ACCESS_TOKEN" ] || [ "$ACCESS_TOKEN" == "null" ]; then
@@ -47,7 +47,7 @@ fi
 
 echo "✅ Retrieved access_token: $ACCESS_TOKEN"
 
-# Step 3: Update ./config/config.json with new token
+# Update ./config/config.json with new token
 
 # Update BACKEND_AUTH_TOKEN field
 TMP_FILE=$(mktemp)
