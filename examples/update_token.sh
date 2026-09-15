@@ -1,27 +1,28 @@
 #!/bin/bash
-# Usage: update_token.sh [USER] [PASSWORD]
-
-CONFIG_FILE="./config/config.json"
-if [ ! -f "$CONFIG_FILE" ]; then
-  echo "❌ Config file not found: $CONFIG_FILE"
-  exit 1
-fi
+# Usage: update_token.sh [USER] [PASSWORD] [CONFIGURATION FILE]
 
 # OFBiz token issuance URL
 BACKEND_API_AUTH="https://demo-stable.ofbiz.apache.org/rest/auth/token"
 
-# Allow USER and PASSWORD as positional args or environment variables
+# Allow USER, PASSWORD and CONFIGURATION FILE as positional args or environment variables
 
 USER_ARG="$1"
 PASS_ARG="$2"
+CONFIG_FILE_ARG="$3"
 
-if [ -n "$USER_ARG" ] && [ -n "$PASS_ARG" ]; then
+if [ -n "$USER_ARG" ] && [ -n "$PASS_ARG" ] && [ -n "$CONFIG_FILE_ARG" ]; then
   AUTH_USER="$USER_ARG"
   AUTH_PASS="$PASS_ARG"
+  CONFIG_FILE="$CONFIG_FILE_ARG"
 fi
 
-if [ -z "$AUTH_USER" ] || [ -z "$AUTH_PASS" ]; then
-  echo "❌ Missing USER and PASSWORD. Provide as arguments or set AUTH_USER and AUTH_PASS env vars."
+if [ -z "$AUTH_USER" ] || [ -z "$AUTH_PASS" ] || [ -z "$CONFIG_FILE" ]; then
+  echo "❌ Missing USER, PASSWORD, or CONFIG_FILE. Use update_token.sh [USER] [PASSWORD] [CONFIGURATION FILE] or set corresponding env vars: AUTH_USER, AUTH_PASS, CONFIG_FILE."
+  exit 1
+fi
+
+if [ ! -f "$CONFIG_FILE" ]; then
+  echo "❌ Config file not found: $CONFIG_FILE"
   exit 1
 fi
 
