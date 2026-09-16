@@ -1,5 +1,5 @@
 #!/bin/bash
-# Usage: update_token.sh [USER] [PASSWORD] [CONFIGURATION FILE]
+# Usage: get_api_access_token.sh [USER] [PASSWORD] [CONFIGURATION FILE]
 
 # OFBiz token issuance URL
 BACKEND_API_AUTH="https://demo-stable.ofbiz.apache.org/rest/auth/token"
@@ -17,12 +17,12 @@ if [ -n "$USER_ARG" ] && [ -n "$PASS_ARG" ] && [ -n "$CONFIG_FILE_ARG" ]; then
 fi
 
 if [ -z "$AUTH_USER" ] || [ -z "$AUTH_PASS" ] || [ -z "$CONFIG_FILE" ]; then
-  echo "❌ Missing USER, PASSWORD, or CONFIG_FILE. Use update_token.sh [USER] [PASSWORD] [CONFIGURATION FILE] or set corresponding env vars: AUTH_USER, AUTH_PASS, CONFIG_FILE."
+  echo "❌ Missing USER, PASSWORD, or CONFIGURATION FILE. Use get_api_access_token.sh [USER] [PASSWORD] [CONFIGURATION FILE] or set corresponding env vars: AUTH_USER, AUTH_PASS, CONFIG_FILE."
   exit 1
 fi
 
 if [ ! -f "$CONFIG_FILE" ]; then
-  echo "❌ Config file not found: $CONFIG_FILE"
+  echo "❌ Configuration file not found: $CONFIG_FILE"
   exit 1
 fi
 
