@@ -37,15 +37,18 @@ mcp-server> cd examples/tools
 mcp-server/examples/tools> npm install
 mcp-server/examples/tools> npm run build
 mcp-server/examples/tools> cd ..
-mcp-server/examples> ./update_token.sh admin ofbiz
+mcp-server/examples> ./get_api_access_token.sh admin ofbiz ./config/config.json
 mcp-server/examples> cd ..
 mcp-server> node build/server.js ./examples/config ./examples/tools
 ```
-From another shell you can start the MCP Inspector:
+To test the MCP server, start the MCP Inspector from another shell:
 ```sh
 > npx @modelcontextprotocol/inspector
 ```
-This command will open a browser window to the Inspector application: set `Transport Type` to `Streamable HTTP` and `URL` to `http://localhost:3000/mcp` and hit the `Connect` button. After that, you will be connected to the MCP server and could execute its tool, that fetches data from one of the public demo instances of Apache OFBiz.
+This command will open a browser window for the Inspector application. Click `Add Servers` and select `Add manually`. Choose a Server ID, select `streamable-http` as the transport, and specify the MCP server URL as `http://localhost:3000/mcp`. Click `Add`, then connect to the server using the toggle in the top-right corner.
+
+Once connected, you can execute the `findProductById` tool, which fetches data from one of the public demo instances of Apache OFBiz. Select the `Tools` tab at the top of the page, select `findProductById`, and enter a valid product ID, such as GZ-1000.
+
 
 ## Features
 
@@ -90,7 +93,6 @@ Server configuration is managed via the `config.json` file contained in a config
 - **`BACKEND_API_AUDIENCE`** — the OAuth audience paramenter for the backend system
 - **`BACKEND_API_RESOURCE`** — the OAuth resource parameter for the backend system
 - **`TOKEN_EXCHANGE_SCOPE`** — the list of scopes requested in the token exchange
-- **`BACKEND_API_AUTH`** - the URL to get the OFBiz APIs access token used if token exchange is not enabled
 - **`BACKEND_AUTH_TOKEN`** — the token to authorize backend API calls used if token exchange is not enabled
 
 If both **`TLS_CERT_PATH`** and **`TLS_KEY_PATH`** are configured, the MCP server will operate over HTTPS; otherwise, it falls back to HTTP.
@@ -115,7 +117,7 @@ mcp-server-for-apache-ofbiz/
 │   │   │   └── findProductById.ts    # Sample tool calling an Apache OFBiz endpoint
 │   │   ├── package.json              
 │   │   └── tsconfig.json             
-│   ├── update_token.sh           # Script to get a backend auth token for Apache OFBiz APIs
+│   ├── get_api_access_token.sh           # Script to get a backend auth token for Apache OFBiz APIs
 │   └── README.md
 ├── src/
 │   ├── lib/                      # Internal modules of the MCP server:
@@ -144,10 +146,10 @@ With the configuration file provided (`./examples/config/config.json`) the MCP s
 
 The access token required for the OFBiz APIs can be generated and set in **`BACKEND_AUTH_TOKEN`** by running from the `examples` folder the utility script 
 
-`update_token.sh <user> <password>`
+`get_api_access_token.sh <user> <password> <configuration_file>`
 
-with, e.g., `admin` and `ofbiz`, as user and password, respectively.
-This script retrieves a JWT for an OOTB OFBiz instance from `https://demo-stable.ofbiz.apache.org/rest/auth/token`, as specified in **`BACKEND_API_AUTH`**.
+with, e.g., `admin`, `ofbiz`, and `./config/config.json` as user, password, and configuration file, respectively.
+This script retrieves a JWT for an OOTB OFBiz instance from `https://demo-stable.ofbiz.apache.org/rest/auth/token`.
 
 In order to compile the sample tool, go to the `examples/tools` directory and run
 
